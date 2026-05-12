@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Kết quả xét tuyển</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+        .hero {
+            background: linear-gradient(135deg, #0f4c81, #1976d2);
+            color: white;
+            padding: 28px 0;
+        }
+        .container {
+            width: 1150px;
+            max-width: calc(100% - 32px);
+            margin: 0 auto;
+        }
+        .hero h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .hero p {
+            margin: 8px 0 0;
+            opacity: 0.95;
+        }
+        .content {
+            margin-top: 26px;
+            margin-bottom: 32px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 12px 30px rgba(15, 76, 129, 0.08);
+            border: 1px solid #e6edf8;
+        }
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .btn-back {
+            text-decoration: none;
+            background: #1976d2;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .summary {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+        .summary-box {
+            flex: 1;
+            min-width: 220px;
+            background: linear-gradient(135deg, #f8fbff, #eef5ff);
+            border: 1px solid #dfeafb;
+            border-radius: 16px;
+            padding: 16px;
+        }
+        .summary-box .label {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+        .summary-box .value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f4c81;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 14px;
+        }
+        th {
+            background: #eaf3ff;
+            color: #0f4c81;
+            text-align: left;
+            padding: 14px 12px;
+            font-size: 14px;
+        }
+        td {
+            padding: 14px 12px;
+            border-top: 1px solid #edf2f7;
+            vertical-align: top;
+        }
+        tr:hover td {
+            background: #fafcff;
+        }
+        .badge {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .badge-pass {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .badge-fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .empty {
+            padding: 28px;
+            text-align: center;
+            color: #6b7280;
+            background: #fafcff;
+            border: 1px dashed #cfddee;
+            border-radius: 16px;
+        }
+        @media (max-width: 900px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead {
+                display: none;
+            }
+            tr {
+                background: white;
+                border: 1px solid #e7edf6;
+                border-radius: 16px;
+                margin-bottom: 14px;
+                overflow: hidden;
+            }
+            td {
+                border: none;
+                border-bottom: 1px solid #f1f5f9;
+            }
+            td:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="hero">
+    <div class="container">
+        <h1>Kết quả xét tuyển</h1>
+        <p>Hiển thị kết quả theo nguyện vọng xét tuyển của thí sinh.</p>
+    </div>
+</div>
+
+<div class="container content">
+    <div class="card">
+        <div class="toolbar">
+            <div>
+                <h2 style="margin:0;color:#0f4c81;">Xin chào <span th:text="${thiSinh.hoTen}"></span></h2>
+                <p style="margin:6px 0 0;color:#6b7280;">CCCD: <span th:text="${thiSinh.cccd}"></span></p>
+            </div>
+            <a class="btn-back" th:href="@{/user/home}">Quay lại trang chủ</a>
+        </div>
+
+        <div class="summary">
+            <div class="summary-box">
+                <div class="label">Tổng số nguyện vọng</div>
+                <div class="value" th:text="${#lists.size(ketQuaList)}"></div>
+            </div>
+            <div class="summary-box">
+                <div class="label">Trạng thái tra cứu</div>
+                <div class="value">Đã tải dữ liệu</div>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(ketQuaList)}" class="empty">
+            Không tìm thấy dữ liệu xét tuyển của thí sinh.
+        </div>
+
+        <table th:if="${!#lists.isEmpty(ketQuaList)}">
+            <thead>
+            <tr>
+                <th>NV</th>
+                <th>Mã ngành</th>
+                <th>Tên ngành</th>
+                <th>Tổ hợp</th>
+                <th>Phương thức</th>
+                <th>Điểm xét tuyển</th>
+                <th>Điểm trúng tuyển</th>
+                <th>Kết quả</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${ketQuaList}">
+                <td th:text="${item.thuTuNguyenVong}"></td>
+                <td th:text="${item.maNganh}"></td>
+                <td th:text="${ketQuaService.getTenNganh(item.maNganh)}"></td>
+                <td th:text="${item.toHop}"></td>
+                <td th:text="${item.phuongThuc}"></td>
+                <td th:text="${item.diemXetTuyen}"></td>
+                <td th:text="${ketQuaService.getDiemTrungTuyen(item.maNganh)}"></td>
+                <td>
+                    <span th:if="${ketQuaService.isTrungTuyen(item.ketQua)}" class="badge badge-pass">
+                        Trúng tuyển
+                    </span>
+                    <span th:if="${!ketQuaService.isTrungTuyen(item.ketQua)}"
+                          class="badge badge-fail"
+                          th:text="${item.ketQua}">
+                    </span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

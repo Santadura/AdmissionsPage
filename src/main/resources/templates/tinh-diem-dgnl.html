@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tính điểm xét tuyển ĐGNL</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+        .hero {
+            background: linear-gradient(135deg, #0f4c81, #1976d2);
+            color: white;
+            padding: 28px 0;
+        }
+        .container {
+            width: 1100px;
+            max-width: calc(100% - 32px);
+            margin: 0 auto;
+        }
+        .hero h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .hero p {
+            margin: 8px 0 0;
+            opacity: 0.95;
+        }
+        .content {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 24px;
+            margin: 28px auto 32px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 12px 30px rgba(15, 76, 129, 0.08);
+            border: 1px solid #e6edf8;
+        }
+        h2 {
+            margin-top: 0;
+            color: #0f4c81;
+        }
+        label {
+            display: block;
+            margin: 14px 0 6px;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d7e3f4;
+            border-radius: 12px;
+            font-size: 15px;
+        }
+        button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background: #1976d2;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1159a5;
+        }
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+        .result-item {
+            background: #f8fbff;
+            border: 1px solid #e2ecf8;
+            border-radius: 14px;
+            padding: 14px;
+        }
+        .label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+        .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+        }
+        .badge {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+        .pass {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .back {
+            display: inline-block;
+            margin-top: 14px;
+            text-decoration: none;
+            color: #1976d2;
+            font-weight: 600;
+        }
+        @media (max-width: 920px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="hero">
+    <div class="container">
+        <h1>Tính điểm xét tuyển ĐGNL</h1>
+        <p>Nhập điểm ĐGNL, chọn ngành và tổ hợp gốc để xem kết quả quy đổi.</p>
+    </div>
+</div>
+
+<div class="container content">
+    <div class="card">
+        <h2>Thông tin tính điểm</h2>
+        <form method="post" th:action="@{/user/tinh-diem/dgnl}">
+            <label>Điểm ĐGNL (thang 1200)</label>
+            <input type="number" step="0.01" name="diemDgnl" th:value="${diemDgnl}" required>
+
+            <label>Ngành xét tuyển</label>
+            <select name="maNganh" required>
+                <option value="">-- Chọn ngành --</option>
+                <option th:each="nganh : ${dsNganh}"
+                        th:value="${nganh.maNganh}"
+                        th:text="${nganh.maNganh + ' - ' + nganh.tenNganh}"
+                        th:selected="${nganh.maNganh == selectedMaNganh}">
+                </option>
+            </select>
+
+            <label>Tổ hợp gốc</label>
+            <select name="toHop" required>
+                <option value="">-- Chọn tổ hợp --</option>
+                <option th:each="th : ${dsToHop}"
+                        th:value="${th}"
+                        th:text="${th}"
+                        th:selected="${th == selectedToHop}">
+                </option>
+            </select>
+
+            <label>Điểm ưu tiên</label>
+            <input type="number" step="0.01" name="diemUuTien" th:value="${diemUuTien != null ? diemUuTien : 0}">
+
+            <label>Điểm cộng khác</label>
+            <input type="number" step="0.01" name="diemCong" th:value="${diemCong != null ? diemCong : 0}">
+
+            <button type="submit">Tính điểm</button>
+        </form>
+
+        <a class="back" th:href="@{/user/home}">← Quay lại trang chủ</a>
+    </div>
+
+    <div class="card">
+        <h2>Kết quả</h2>
+
+        <div th:if="${ketQua == null}" style="color:#6b7280;">
+            Chưa có dữ liệu tính điểm. Hãy nhập thông tin bên trái và bấm "Tính điểm".
+        </div>
+
+        <div th:if="${ketQua != null}">
+            <div class="result-grid">
+                <div class="result-item">
+                    <div class="label">Mã ngành</div>
+                    <div class="value" th:text="${ketQua.maNganh}"></div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Tên ngành</div>
+                    <div class="value" th:text="${ketQua.tenNganh}"></div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Tổ hợp gốc</div>
+                    <div class="value" th:text="${ketQua.toHop}"></div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Điểm ĐGNL</div>
+                    <div class="value" th:text="${#numbers.formatDecimal(ketQua.diemDgnl,1,2)}"></div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Điểm quy đổi thang 30</div>
+                    <div class="value" th:text="${#numbers.formatDecimal(ketQua.diemQuyDoi,1,2)}"></div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Điểm ưu tiên</div>
+                    <div class="value" th:text="${#numbers.formatDecimal(ketQua.diemUuTien,1,2)}"></div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Điểm cộng</div>
+                    <div class="value" th:text="${#numbers.formatDecimal(ketQua.diemCong,1,2)}"></div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Điểm sàn</div>
+                    <div class="value" th:text="${ketQua.diemSan}"></div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Điểm trúng tuyển</div>
+                    <div class="value" th:text="${ketQua.diemTrungTuyen}"></div>
+                </div>
+                <div class="result-item" style="grid-column: span 2;">
+                    <div class="label">Tổng điểm xét tuyển</div>
+                    <div class="value" th:text="${#numbers.formatDecimal(ketQua.tongDiem,1,2)}"></div>
+                </div>
+            </div>
+
+            <div>
+                <span class="badge pass" th:if="${ketQua.datDiemSan}">
+                    Đạt điểm sàn
+                </span>
+                <span class="badge fail" th:if="${!ketQua.datDiemSan}">
+                    Không đạt điểm sàn
+                </span>
+            </div>
+
+            <div>
+                <span class="badge pass" th:if="${ketQua.datDiemTrungTuyen}">
+                    Đạt điểm trúng tuyển
+                </span>
+                <span class="badge fail" th:if="${!ketQua.datDiemTrungTuyen}">
+                    Chưa đạt điểm trúng tuyển
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

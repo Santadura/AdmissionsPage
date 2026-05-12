@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tính điểm THPT / VSAT</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+        .hero {
+            background: linear-gradient(135deg, #0f4c81, #1976d2);
+            color: white;
+            padding: 28px 0;
+        }
+        .container {
+            width: 1180px;
+            max-width: calc(100% - 32px);
+            margin: 0 auto;
+        }
+        .content {
+            display: grid;
+            grid-template-columns: 460px 1fr;
+            gap: 24px;
+            margin: 28px auto 32px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 12px 30px rgba(15, 76, 129, 0.08);
+            border: 1px solid #e6edf8;
+        }
+        h1, h2 { margin-top: 0; }
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d7e3f4;
+            border-radius: 12px;
+        }
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background: #1976d2;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #edf2f7;
+            text-align: left;
+        }
+        th {
+            background: #edf5ff;
+            color: #0f4c81;
+        }
+        .badge {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .pass {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .back {
+            display: inline-block;
+            margin-top: 14px;
+            text-decoration: none;
+            color: #1976d2;
+            font-weight: 600;
+        }
+        @media (max-width: 940px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            .subject-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="hero">
+    <div class="container">
+        <h1>Tính điểm xét tuyển THPT / VSAT</h1>
+        <p>Nhập điểm các môn và xem điểm xét tuyển theo từng tổ hợp của ngành.</p>
+    </div>
+</div>
+
+<div class="container content">
+    <div class="card">
+        <h2>Nhập dữ liệu</h2>
+        <form method="post" th:action="@{/user/tinh-diem/thpt}">
+            <label>Ngành xét tuyển</label>
+            <select name="maNganh" required>
+                <option value="">-- Chọn ngành --</option>
+                <option th:each="nganh : ${dsNganh}"
+                        th:value="${nganh.maNganh}"
+                        th:text="${nganh.maNganh + ' - ' + nganh.tenNganh}"
+                        th:selected="${nganh.maNganh == selectedMaNganh}">
+                </option>
+            </select>
+
+            <div class="subject-grid">
+                <div>
+                    <label>Toán</label>
+                    <input type="number" step="0.01" name="toan" th:value="${toan}">
+                </div>
+                <div>
+                    <label>Lý</label>
+                    <input type="number" step="0.01" name="ly" th:value="${ly}">
+                </div>
+                <div>
+                    <label>Hóa</label>
+                    <input type="number" step="0.01" name="hoa" th:value="${hoa}">
+                </div>
+                <div>
+                    <label>Sinh</label>
+                    <input type="number" step="0.01" name="sinh" th:value="${sinh}">
+                </div>
+                <div>
+                    <label>Văn</label>
+                    <input type="number" step="0.01" name="van" th:value="${van}">
+                </div>
+                <div>
+                    <label>Sử</label>
+                    <input type="number" step="0.01" name="su" th:value="${su}">
+                </div>
+                <div>
+                    <label>Địa</label>
+                    <input type="number" step="0.01" name="dia" th:value="${dia}">
+                </div>
+                <div>
+                    <label>Tiếng Anh</label>
+                    <input type="number" step="0.01" name="tiengAnh" th:value="${tiengAnh}">
+                </div>
+            </div>
+
+            <label>Điểm ưu tiên</label>
+            <input type="number" step="0.01" name="diemUuTien" th:value="${diemUuTien != null ? diemUuTien : 0}">
+
+            <label>Điểm cộng</label>
+            <input type="number" step="0.01" name="diemCong" th:value="${diemCong != null ? diemCong : 0}">
+
+            <button type="submit">Tính điểm</button>
+        </form>
+
+        <a class="back" th:href="@{/user/home}">← Quay lại trang chủ</a>
+    </div>
+
+    <div class="card">
+        <h2>Kết quả theo tổ hợp</h2>
+
+        <div th:if="${ketQua == null}" style="color:#6b7280;">
+            Chưa có dữ liệu. Hãy nhập điểm và bấm "Tính điểm".
+        </div>
+
+        <div th:if="${ketQua != null}">
+            <p><strong>Ngành:</strong> <span th:text="${ketQua.tenNganh}"></span></p>
+            <p><strong>Điểm sàn:</strong> <span th:text="${ketQua.diemSan}"></span></p>
+            <p><strong>Điểm trúng tuyển:</strong> <span th:text="${ketQua.diemTrungTuyen}"></span></p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tổ hợp</th>
+                        <th>Môn 1</th>
+                        <th>Môn 2</th>
+                        <th>Môn 3</th>
+                        <th>Tổng điểm</th>
+                        <th>Điểm sàn</th>
+                        <th>Điểm trúng tuyển</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${ketQua.ketQuaToHop}">
+                        <td th:text="${item.maToHop}"></td>
+                        <td th:text="${item.mon1}"></td>
+                        <td th:text="${item.mon2}"></td>
+                        <td th:text="${item.mon3}"></td>
+                        <td th:text="${#numbers.formatDecimal(item.tongDiem,1,2)}"></td>
+                        <td>
+                            <span th:if="${item.datSan}" class="badge pass">Đạt</span>
+                            <span th:if="${!item.datSan}" class="badge fail">Không đạt</span>
+                        </td>
+                        <td>
+                            <span th:if="${item.datTrungTuyen}" class="badge pass">Đạt</span>
+                            <span th:if="${!item.datTrungTuyen}" class="badge fail">Chưa đạt</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
