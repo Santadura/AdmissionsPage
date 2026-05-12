@@ -25,12 +25,23 @@ public class Nganh {
     @Column(name = "n_diemtrungtuyen")
     private Double diemTrungTuyen;
 
+    @Column(name = "n_tohopgoc")
+    private String toHopGoc;
+
     public Integer getId() {
         return id;
     }
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Double getDiemSan() {
+        return diemSan;
+    }
+
+    public void setDiemSan(Double diemSan) {
+        this.diemSan = diemSan;
     }
 
     public String getMaNganh() {
@@ -57,11 +68,11 @@ public class Nganh {
         this.diemTrungTuyen = diemTrungTuyen;
     }
 
-    public Double getDiemSan() {
-        return diemSan;
+    public String getToHopGoc() {
+        return toHopGoc;
     }
 
-    public void setDiemSan(Double diemSan) {
-        this.diemSan = diemSan;
+    public void setToHopGoc(String toHopGoc) {
+        this.toHopGoc = toHopGoc;
     }
 }

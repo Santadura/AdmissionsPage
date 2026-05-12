@@ -48,17 +48,19 @@ public class TinhDiemThptController {
                            @RequestParam(value = "su", required = false) Double su,
                            @RequestParam(value = "dia", required = false) Double dia,
                            @RequestParam(value = "tiengAnh", required = false) Double tiengAnh,
-                           @RequestParam(value = "diemUuTien", required = false) Double diemUuTien,
+                           @RequestParam(value = "khuVuc", required = false) String khuVuc,
+                           @RequestParam(value = "doiTuong", required = false) String doiTuong,
                            @RequestParam(value = "diemCong", required = false) Double diemCong,
                            HttpSession session,
                            Model model) {
+
         ThiSinh thiSinh = (ThiSinh) session.getAttribute("loggedInThiSinh");
         if (thiSinh == null) {
             return "redirect:/login";
         }
 
         Map<String, Object> ketQua = tinhDiemThptService.tinhDiem(
-                maNganh, toan, ly, hoa, sinh, van, su, dia, tiengAnh, diemUuTien, diemCong
+                maNganh, toan, ly, hoa, sinh, van, su, dia, tiengAnh, khuVuc, doiTuong, diemCong
         );
 
         model.addAttribute("thiSinh", thiSinh);
@@ -74,7 +76,8 @@ public class TinhDiemThptController {
         model.addAttribute("su", su);
         model.addAttribute("dia", dia);
         model.addAttribute("tiengAnh", tiengAnh);
-        model.addAttribute("diemUuTien", diemUuTien);
+        model.addAttribute("khuVuc", khuVuc);
+        model.addAttribute("doiTuong", doiTuong);
         model.addAttribute("diemCong", diemCong);
 
         return "tinh-diem-thpt";

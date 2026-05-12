@@ -1,195 +1,80 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <title>Trang thí sinh</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(135deg, #eef4ff, #f8fbff);
-            color: #1f2937;
-        }
-
-        .topbar {
-            background: linear-gradient(135deg, #0f4c81, #1565c0);
-            color: white;
-            padding: 24px 0;
-            box-shadow: 0 10px 28px rgba(21, 101, 192, 0.18);
-        }
-
-        .container {
-            width: 1100px;
-            max-width: calc(100% - 32px);
-            margin: 0 auto;
-        }
-
-        .topbar h1 {
-            margin: 0;
-            font-size: 30px;
-        }
-
-        .topbar p {
-            margin: 8px 0 0;
-            opacity: 0.95;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 24px;
-            margin-top: 28px;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 22px;
-            padding: 24px;
-            box-shadow: 0 12px 36px rgba(15, 76, 129, 0.08);
-            border: 1px solid #e7eef8;
-        }
-
-        .card h2 {
-            margin-top: 0;
-            color: #0f4c81;
-            font-size: 22px;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
-        }
-
-        .info-item {
-            background: #f8fbff;
-            border: 1px solid #e2ecf8;
-            border-radius: 14px;
-            padding: 14px;
-        }
-
-        .label {
-            font-size: 13px;
-            color: #6b7280;
-            margin-bottom: 6px;
-        }
-
-        .value {
-            font-size: 16px;
-            font-weight: 600;
-            color: #111827;
-        }
-
-        .menu-list {
-            display: grid;
-            gap: 14px;
-            margin-top: 16px;
-        }
-
-        .menu-link {
-            display: block;
-            text-decoration: none;
-            padding: 18px 20px;
-            border-radius: 16px;
-            color: #12324a;
-            background: linear-gradient(135deg, #f8fbff, #eef5ff);
-            border: 1px solid #dde9f8;
-            transition: all 0.2s ease;
-            font-weight: 600;
-        }
-
-        .menu-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(21, 101, 192, 0.10);
-        }
-
-        .logout {
-            display: inline-block;
-            margin-top: 18px;
-            text-decoration: none;
-            background: #dc2626;
-            color: white;
-            padding: 11px 18px;
-            border-radius: 12px;
-            font-weight: 600;
-        }
-
-        @media (max-width: 900px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/ts-style.css}">
 </head>
-
 <body>
-    <div class="topbar">
-        <div class="container">
-            <h1>Cổng tra cứu tuyển sinh</h1>
-            <p>Xin chào <span th:text="${thiSinh.hoTen}"></span>, bạn đã đăng nhập thành công.</p>
+<div class="page-wrap">
+    <div class="panel">
+        <div class="panel-header">
+            <h1 class="page-title">Cổng tra cứu tuyển sinh</h1>
+            <p class="note-text">
+                Xin chào <strong th:text="${thiSinh.hoTen}"></strong>, bạn đã đăng nhập thành công.
+            </p>
         </div>
     </div>
 
-    <div class="container">
-        <div class="grid">
-            <div class="card">
-                <h2>Thông tin thí sinh</h2>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="label">Họ và tên</div>
-                        <div class="value" th:text="${thiSinh.hoTen}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="label">CCCD</div>
-                        <div class="value" th:text="${thiSinh.cccd}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="label">Số báo danh</div>
-                        <div class="value" th:text="${thiSinh.soBaoDanh}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="label">Ngày sinh</div>
-                        <div class="value" th:text="${thiSinh.ngaySinh}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="label">Email</div>
-                        <div class="value" th:text="${thiSinh.email}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="label">Điện thoại</div>
-                        <div class="value" th:text="${thiSinh.dienThoai}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="label">Đối tượng</div>
-                        <div class="value" th:text="${thiSinh.doiTuong}"></div>
-                    </div>
-                    <div class="info-item">
-                        <div class="label">Khu vực</div>
-                        <div class="value" th:text="${thiSinh.khuVuc}"></div>
-                    </div>
-                </div>
+    <div class="home-grid">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="section-title">Thông tin thí sinh</h2>
             </div>
+            <div class="panel-body">
+                <table class="result-table">
+                    <tbody>
+                    <tr>
+                        <td>Họ và tên</td>
+                        <td th:text="${thiSinh.hoTen}"></td>
+                    </tr>
+                    <tr>
+                        <td>CCCD</td>
+                        <td th:text="${thiSinh.cccd}"></td>
+                    </tr>
+                    <tr>
+                        <td>Số báo danh</td>
+                        <td th:text="${thiSinh.soBaoDanh}"></td>
+                    </tr>
+                    <tr>
+                        <td>Ngày sinh</td>
+                        <td th:text="${thiSinh.ngaySinh}"></td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td th:text="${thiSinh.email}"></td>
+                    </tr>
+                    <tr>
+                        <td>Điện thoại</td>
+                        <td th:text="${thiSinh.dienThoai}"></td>
+                    </tr>
+                    <tr>
+                        <td>Đối tượng</td>
+                        <td th:text="${thiSinh.doiTuong}"></td>
+                    </tr>
+                    <tr>
+                        <td>Khu vực</td>
+                        <td th:text="${thiSinh.khuVuc}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-            <div class="card">
-                <h2>Chức năng</h2>
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="section-title">Chức năng</h2>
+            </div>
+            <div class="panel-body">
                 <div class="menu-list">
                     <a class="menu-link" th:href="@{/user/ket-qua}">Tra cứu kết quả xét tuyển</a>
                     <a class="menu-link" th:href="@{/user/tinh-diem/dgnl}">Tính điểm xét tuyển ĐGNL</a>
                     <a class="menu-link" th:href="@{/user/tinh-diem/thpt}">Tính điểm xét tuyển THPT / VSAT</a>
                 </div>
-                <a class="logout" th:href="@{/logout}">Đăng xuất</a>
+                <a class="logout-link" th:href="@{/logout}">Đăng xuất</a>
             </div>
         </div>
     </div>
+</div>
 </body>
-
 </html>

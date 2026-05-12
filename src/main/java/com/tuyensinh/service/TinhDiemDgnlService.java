@@ -23,27 +23,40 @@ public class TinhDiemDgnlService {
         this.bangQuyDoiRepository = bangQuyDoiRepository;
     }
 
-    public Map<String, Object> tinhDiem(Double diemDgnl, String maNganh, String toHop, Double diemUuTien, Double diemCong) {
+    public Map<String, Object> tinhDiem(Double diemDgnl, String maNganh, String khuVuc, String doiTuong, Double diemCong) {
         Map<String, Object> result = new LinkedHashMap<>();
 
         if (diemDgnl == null) diemDgnl = 0.0;
-        if (diemUuTien == null) diemUuTien = 0.0;
         if (diemCong == null) diemCong = 0.0;
+        if (khuVuc == null) khuVuc = "";
+        if (doiTuong == null) doiTuong = "";
 
         Nganh nganh = nganhRepository.findByMaNganh(maNganh).orElse(null);
 
-        double diemQuyDoi = timDiemQuyDoiDgnl(diemDgnl, toHop);
-        double tongDiem = diemQuyDoi + diemUuTien + diemCong;
-
+        String tenNganh = "";
+        String toHop = "D01";
         Double diemSan = null;
         Double diemTrungTuyen = null;
-        String tenNganh = "";
 
         if (nganh != null) {
             tenNganh = nganh.getTenNganh();
             diemSan = nganh.getDiemSan();
             diemTrungTuyen = nganh.getDiemTrungTuyen();
+
+            if (nganh.getToHopGoc() != null && !nganh.getToHopGoc().trim().isEmpty()) {
+                toHop = nganh.getToHopGoc().trim();
+            }
         }
+
+        Map<String, Object> quyDoiInfo = timDiemQuyDoiDgnlVaCongThuc(diemDgnl, toHop);
+        double diemQuyDoi = (Double) quyDoiInfo.get("diemQuyDoi");
+        String congThucQuyDoi = (String) quyDoiInfo.get("congThucQuyDoi");
+
+        double diemUuTien = tinhDiemUuTien(khuVuc, doiTuong);
+        double tongDiem = diemQuyDoi + diemCong + diemUuTien;
+
+        String dienGiaiTongDiem = String.format("%.2f + %.2f + %.2f = %.2f",
+                diemQuyDoi, diemCong, diemUuTien, tongDiem);
 
         boolean datDiemSan = diemSan != null && tongDiem >= diemSan;
         boolean datDiemTrungTuyen = diemTrungTuyen != null && tongDiem >= diemTrungTuyen;
@@ -53,60 +66,107 @@ public class TinhDiemDgnlService {
         result.put("toHop", toHop);
         result.put("diemDgnl", diemDgnl);
         result.put("diemQuyDoi", diemQuyDoi);
-        result.put("diemUuTien", diemUuTien);
+        result.put("congThucQuyDoi", congThucQuyDoi);
         result.put("diemCong", diemCong);
+        result.put("diemUuTien", diemUuTien);
         result.put("tongDiem", tongDiem);
+        result.put("dienGiaiTongDiem", dienGiaiTongDiem);
         result.put("diemSan", diemSan);
         result.put("diemTrungTuyen", diemTrungTuyen);
         result.put("datDiemSan", datDiemSan);
         result.put("datDiemTrungTuyen", datDiemTrungTuyen);
+        result.put("khuVuc", khuVuc);
+        result.put("doiTuong", doiTuong);
 
         return result;
     }
 
-    private double timDiemQuyDoiDgnl(Double diemDgnl, String toHop) {
-        List<BangQuyDoi> ds;
-
-        if (toHop != null && !toHop.trim().isEmpty()) {
-            ds = bangQuyDoiRepository.findByPhuongThucAndToHopOrderByPhanViAsc("DGNL", toHop);
-        } else {
-            ds = bangQuyDoiRepository.findByPhuongThucOrderByToHopAscPhanViAsc("DGNL");
-        }
+    private Map<String, Object> timDiemQuyDoiDgnlVaCongThuc(Double diemDgnl, String toHop) {
+        Map<String, Object> kq = new LinkedHashMap<>();
+        List<BangQuyDoi> ds = bangQuyDoiRepository.findByPhuongThucAndToHopOrderByPhanViAsc("DGNL", toHop);
 
         if (ds == null || ds.isEmpty()) {
-            return diemDgnl * 30.0 / 1200.0;
+            double macDinh = diemDgnl * 30.0 / 1200.0;
+            kq.put("diemQuyDoi", macDinh);
+            kq.put("congThucQuyDoi", String.format("%.2f x 30 / 1200 = %.2f", diemDgnl, macDinh));
+            return kq;
         }
 
         for (BangQuyDoi item : ds) {
-            Double minGoc = item.getDiemA();
-            Double maxGoc = item.getDiemB();
-            Double minQuyDoi = item.getDiemC();
-            Double maxQuyDoi = item.getDiemD();
+            Double diemA = item.getDiemA();
+            Double diemB = item.getDiemB();
+            Double diemC = item.getDiemC();
+            Double diemD = item.getDiemD();
 
-            if (minGoc == null || maxGoc == null || minQuyDoi == null || maxQuyDoi == null) {
+            if (diemA == null || diemB == null || diemC == null || diemD == null) {
                 continue;
             }
 
+            double minGoc = Math.min(diemA, diemB);
+            double maxGoc = Math.max(diemA, diemB);
+
             if (diemDgnl >= minGoc && diemDgnl <= maxGoc) {
-                if (maxGoc.equals(minGoc)) {
-                    return minQuyDoi;
+                double diemQuyDoi;
+
+                if (Math.abs(diemB - diemA) < 0.000001) {
+                    diemQuyDoi = diemC;
+                    kq.put("diemQuyDoi", diemQuyDoi);
+                    kq.put("congThucQuyDoi", String.format("%.2f", diemQuyDoi));
+                    return kq;
                 }
 
-                double tyLe = (diemDgnl - minGoc) / (maxGoc - minGoc);
-                return minQuyDoi + tyLe * (maxQuyDoi - minQuyDoi);
+                double tyLe = (diemDgnl - diemA) / (diemB - diemA);
+                diemQuyDoi = diemC + tyLe * (diemD - diemC);
+
+                String congThuc = String.format("%.2f + (%.2f - %.2f) / (%.2f - %.2f) * (%.2f - %.2f)",
+                        diemC, diemDgnl, diemA, diemB, diemA, diemD, diemC);
+
+                kq.put("diemQuyDoi", diemQuyDoi);
+                kq.put("congThucQuyDoi", congThuc);
+                return kq;
             }
         }
 
         BangQuyDoi dau = ds.get(0);
-        if (dau.getDiemA() != null && diemDgnl < dau.getDiemA() && dau.getDiemC() != null) {
-            return dau.getDiemC();
+        if (dau.getDiemA() != null && dau.getDiemB() != null && dau.getDiemC() != null
+                && diemDgnl < Math.min(dau.getDiemA(), dau.getDiemB())) {
+            kq.put("diemQuyDoi", dau.getDiemC());
+            kq.put("congThucQuyDoi", String.format("Điểm nhỏ hơn khoảng đầu, lấy mốc %.2f", dau.getDiemC()));
+            return kq;
         }
 
         BangQuyDoi cuoi = ds.get(ds.size() - 1);
-        if (cuoi.getDiemB() != null && diemDgnl > cuoi.getDiemB() && cuoi.getDiemD() != null) {
-            return cuoi.getDiemD();
+        if (cuoi.getDiemA() != null && cuoi.getDiemB() != null && cuoi.getDiemD() != null
+                && diemDgnl > Math.max(cuoi.getDiemA(), cuoi.getDiemB())) {
+            kq.put("diemQuyDoi", cuoi.getDiemD());
+            kq.put("congThucQuyDoi", String.format("Điểm lớn hơn khoảng cuối, lấy mốc %.2f", cuoi.getDiemD()));
+            return kq;
         }
 
-        return diemDgnl * 30.0 / 1200.0;
+        double macDinh = diemDgnl * 30.0 / 1200.0;
+        kq.put("diemQuyDoi", macDinh);
+        kq.put("congThucQuyDoi", String.format("%.2f x 30 / 1200 = %.2f", diemDgnl, macDinh));
+        return kq;
+    }
+
+    private double tinhDiemUuTien(String khuVuc, String doiTuong) {
+        String kv = khuVuc == null ? "" : khuVuc.trim().toUpperCase();
+        String dt = doiTuong == null ? "" : doiTuong.trim().toUpperCase();
+
+        double diemKhuVuc = switch (kv) {
+            case "KV1" -> 0.75;
+            case "KV2-NT" -> 0.50;
+            case "KV2" -> 0.25;
+            default -> 0.0;
+        };
+
+        double diemDoiTuong = switch (dt) {
+            case "01" -> 2.0;
+            case "02", "03", "04" -> 1.0;
+            case "05", "06", "07" -> 0.5;
+            default -> 0.0;
+        };
+
+        return diemKhuVuc + diemDoiTuong;
     }
 }

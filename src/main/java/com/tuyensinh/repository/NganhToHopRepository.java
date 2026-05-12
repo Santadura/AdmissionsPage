@@ -8,4 +8,4 @@ import com.tuyensinh.entity.NganhToHop;
 
 public interface NganhToHopRepository extends JpaRepository<NganhToHop, Integer> {
     List<NganhToHop> findByMaNganh(String maNganh);
-}   
+}
