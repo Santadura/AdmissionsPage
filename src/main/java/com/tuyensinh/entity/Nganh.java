@@ -58,7 +58,7 @@ public class Nganh {
 
     public void setTenNganh(String tenNganh) {
         this.tenNganh = tenNganh;
-    }
+    }   
 
     public Double getDiemTrungTuyen() {
         return diemTrungTuyen;

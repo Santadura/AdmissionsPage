@@ -43,6 +43,9 @@ public class NguyenVongXetTuyen {
     @Column(name = "tt_thm")
     private String toHop;
 
+    @Column(name = "nv_matohop")
+    private String maToHop;
+
     public Integer getId() {
         return id;
     }
@@ -129,5 +132,13 @@ public class NguyenVongXetTuyen {
 
     public void setToHop(String toHop) {
         this.toHop = toHop;
+    }
+
+    public String getMaToHop() {
+        return maToHop;
+    }
+
+    public void setMaToHop(String maToHop) {
+        this.maToHop = maToHop;
     }
 }

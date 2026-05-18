@@ -1,80 +1,87 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Trang thí sinh</title>
     <link rel="stylesheet" th:href="@{/css/ts-style.css}">
 </head>
+
 <body>
-<div class="page-wrap">
-    <div class="panel">
-        <div class="panel-header">
-            <h1 class="page-title">Cổng tra cứu tuyển sinh</h1>
-            <p class="note-text">
-                Xin chào <strong th:text="${thiSinh.hoTen}"></strong>, bạn đã đăng nhập thành công.
-            </p>
-        </div>
-    </div>
-
-    <div class="home-grid">
+    <div class="page-wrap">
         <div class="panel">
             <div class="panel-header">
-                <h2 class="section-title">Thông tin thí sinh</h2>
-            </div>
-            <div class="panel-body">
-                <table class="result-table">
-                    <tbody>
-                    <tr>
-                        <td>Họ và tên</td>
-                        <td th:text="${thiSinh.hoTen}"></td>
-                    </tr>
-                    <tr>
-                        <td>CCCD</td>
-                        <td th:text="${thiSinh.cccd}"></td>
-                    </tr>
-                    <tr>
-                        <td>Số báo danh</td>
-                        <td th:text="${thiSinh.soBaoDanh}"></td>
-                    </tr>
-                    <tr>
-                        <td>Ngày sinh</td>
-                        <td th:text="${thiSinh.ngaySinh}"></td>
-                    </tr>
-                    <tr>
-                        <td>Email</td>
-                        <td th:text="${thiSinh.email}"></td>
-                    </tr>
-                    <tr>
-                        <td>Điện thoại</td>
-                        <td th:text="${thiSinh.dienThoai}"></td>
-                    </tr>
-                    <tr>
-                        <td>Đối tượng</td>
-                        <td th:text="${thiSinh.doiTuong}"></td>
-                    </tr>
-                    <tr>
-                        <td>Khu vực</td>
-                        <td th:text="${thiSinh.khuVuc}"></td>
-                    </tr>
-                    </tbody>
-                </table>
+                <h1 class="page-title">Cổng tra cứu tuyển sinh</h1>
+                <p class="note-text">
+                    Xin chào <strong th:text="${thiSinh.hoTen}"></strong>, bạn đã đăng nhập thành công.
+                </p>
             </div>
         </div>
 
-        <div class="panel">
-            <div class="panel-header">
-                <h2 class="section-title">Chức năng</h2>
-            </div>
-            <div class="panel-body">
-                <div class="menu-list">
-                    <a class="menu-link" th:href="@{/user/ket-qua}">Tra cứu kết quả xét tuyển</a>
-                    <a class="menu-link" th:href="@{/user/tinh-diem/dgnl}">Tính điểm xét tuyển ĐGNL</a>
-                    <a class="menu-link" th:href="@{/user/tinh-diem/thpt}">Tính điểm xét tuyển THPT / VSAT</a>
+        <div class="home-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="section-title">Thông tin thí sinh</h2>
                 </div>
-                <a class="logout-link" th:href="@{/logout}">Đăng xuất</a>
+                <div class="panel-body">
+                    <table class="result-table">
+                        <tbody>
+                            <tr>
+                                <td>Họ và tên</td>
+                                <td th:text="${thiSinh.hoTen}"></td>
+                            </tr>
+                            <tr>
+                                <td>CCCD</td>
+                                <td th:text="${thiSinh.cccd}"></td>
+                            </tr>
+                            <tr>
+                                <td>Số báo danh</td>
+                                <td th:text="${thiSinh.soBaoDanh}"></td>
+                            </tr>
+                            <tr>
+                                <td>Ngày sinh</td>
+                                <td th:text="${thiSinh.ngaySinh}"></td>
+                            </tr>
+                            <tr>
+                                <td>Email</td>
+                                <td th:text="${thiSinh.email}"></td>
+                            </tr>
+                            <tr>
+                                <td>Điện thoại</td>
+                                <td th:text="${thiSinh.dienThoai}"></td>
+                            </tr>
+                            <tr>
+                                <td>Đối tượng</td>
+                                <td
+                                    th:text="${thiSinh.doiTuong != null and thiSinh.doiTuong != '' ? thiSinh.doiTuong : 'Không có'}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Khu vực</td>
+                                <td
+                                    th:text="${thiSinh.khuVuc != null and thiSinh.khuVuc != '' ? thiSinh.khuVuc : 'Không có'}">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="section-title">Chức năng</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="menu-list">
+                        <a class="menu-link" th:href="@{/user/ket-qua}">Tra cứu kết quả xét tuyển</a>
+                        <a class="menu-link" th:href="@{/user/tinh-diem/dgnl}">Tính điểm xét tuyển ĐGNL</a>
+                        <a class="menu-link" th:href="@{/user/tinh-diem/thpt}">Tính điểm xét tuyển THPT / VSAT</a>
+                    </div>
+                    <a class="logout-link" th:href="@{/logout}">Đăng xuất</a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </body>
+
 </html>

@@ -1,229 +1,254 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Tính điểm THPT / VSAT</title>
     <link rel="stylesheet" th:href="@{/css/ts-style.css}">
 </head>
+
 <body>
-<div class="page-wrap">
-    <div class="panel">
-        <div class="panel-header">
-            <h1 class="page-title">Công cụ tham khảo tính điểm xét tuyển</h1>
-            <div class="sub-title">Điểm thi VSAT (thang điểm 150)</div>
-            <p class="note-text">Môn thi không có điểm: nhập 0.</p>
+    <div class="page-wrap">
+        <div class="panel">
+            <div class="panel-header">
+                <h1 class="page-title">Công cụ tham khảo tính điểm xét tuyển</h1>
+                <div class="sub-title">Điểm thi VSAT (thang điểm 150)</div>
+                <p class="note-text">Môn thi không có điểm: nhập 0.</p>
+            </div>
+
+            <div class="panel-body">
+                <form method="post" th:action="@{/user/tinh-diem/thpt}">
+                    <div class="form-grid-3">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label>Chọn ngành:</label>
+                                <select class="form-control" name="maNganh" required>
+                                    <option value="">-- Chọn ngành --</option>
+                                    <option th:each="nganh : ${dsNganh}" th:value="${nganh.maNganh}"
+                                        th:text="${nganh.tenNganh}" th:selected="${nganh.maNganh == selectedMaNganh}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Điểm cộng (&lt;=3.0):</label>
+                                <input class="form-control" type="number" step="0.01" name="diemCong"
+                                    th:value="${diemCong != null ? diemCong : 0}">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Khu vực ưu tiên:</label>
+                                <select class="form-control" name="khuVuc">
+                                    <option value="" th:selected="${khuVuc == null || khuVuc == ''}">Không có</option>
+                                    <option value="KV1" th:selected="${khuVuc == 'KV1'}">KV1</option>
+                                    <option value="KV2-NT" th:selected="${khuVuc == 'KV2-NT'}">KV2-NT</option>
+                                    <option value="KV2" th:selected="${khuVuc == 'KV2'}">KV2</option>
+                                    <option value="KV3" th:selected="${khuVuc == 'KV3'}">KV3</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Đối tượng ưu tiên:</label>
+                                <select class="form-control" name="doiTuong">
+                                    <option value="" th:selected="${doiTuong == null || doiTuong == ''}">Không có đối
+                                        tượng</option>
+                                    <option value="01" th:selected="${doiTuong == '01'}">Đối tượng 01</option>
+                                    <option value="02" th:selected="${doiTuong == '02'}">Đối tượng 02</option>
+                                    <option value="03" th:selected="${doiTuong == '03'}">Đối tượng 03</option>
+                                    <option value="04" th:selected="${doiTuong == '04'}">Đối tượng 04</option>
+                                    <option value="05" th:selected="${doiTuong == '05'}">Đối tượng 05</option>
+                                    <option value="06" th:selected="${doiTuong == '06'}">Đối tượng 06</option>
+                                    <option value="07" th:selected="${doiTuong == '07'}">Đối tượng 07</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label>Điểm môn Toán:</label>
+                                <input class="form-control" type="number" step="0.01" name="toan" th:value="${toan}">
+                            </div>
+                            <div class="form-group">
+                                <label>Điểm môn Ngữ văn:</label>
+                                <input class="form-control" type="number" step="0.01" name="van" th:value="${van}">
+                            </div>
+                            <div class="form-group">
+                                <label>Điểm môn Vật lý:</label>
+                                <input class="form-control" type="number" step="0.01" name="ly" th:value="${ly}">
+                            </div>
+                            <div class="form-group">
+                                <label>Điểm môn Hóa học:</label>
+                                <input class="form-control" type="number" step="0.01" name="hoa" th:value="${hoa}">
+                            </div>
+                        </div>
+
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label>Điểm môn Sinh học:</label>
+                                <input class="form-control" type="number" step="0.01" name="sinh" th:value="${sinh}">
+                            </div>
+                            <div class="form-group">
+                                <label>Điểm môn Lịch sử:</label>
+                                <input class="form-control" type="number" step="0.01" name="su" th:value="${su}">
+                            </div>
+                            <div class="form-group">
+                                <label>Điểm môn Địa lý:</label>
+                                <input class="form-control" type="number" step="0.01" name="dia" th:value="${dia}">
+                            </div>
+                            <div class="form-group">
+                                <label>Điểm môn Tiếng Anh:</label>
+                                <input class="form-control" type="number" step="0.01" name="tiengAnh"
+                                    th:value="${tiengAnh}">
+                            </div>
+
+                            <div class="btn-row">
+                                <button class="btn-primary" type="submit">Tính điểm</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
 
-        <div class="panel-body">
-            <form method="post" th:action="@{/user/tinh-diem/thpt}">
-                <div class="form-grid-3">
-                    <div class="form-col">
-                        <div class="form-group">
-                            <label>Chọn ngành:</label>
-                            <select class="form-control" name="maNganh" required>
-                                <option value="">-- Chọn ngành --</option>
-                                <option th:each="nganh : ${dsNganh}"
-                                        th:value="${nganh.maNganh}"
-                                        th:text="${nganh.tenNganh}"
-                                        th:selected="${nganh.maNganh == selectedMaNganh}">
-                                </option>
-                            </select>
-                        </div>
+        <div class="panel" th:if="${ketQua != null}">
+            <div class="panel-header">
+                <h2 class="section-title">
+                    Tính điểm vào ngành xét tuyển:
+                    <span class="highlight-red" th:text="${ketQua.tenNganh}"></span>
+                    <span class="highlight-red"
+                        th:text="${selectedMaNganh != null ? ' (' + selectedMaNganh + ')' : ''}"></span>
+                </h2>
+                <p class="note-text">
+                    Tổ hợp có điểm xét tuyển cao nhất:
 
-                        <div class="form-group">
-                            <label>Điểm cộng (&lt;=3.0):</label>
-                            <input class="form-control" type="number" step="0.01" name="diemCong"
-                                   th:value="${diemCong != null ? diemCong : 0}">
-                        </div>
+                    <span class="highlight-red"
+                        th:text="${ketQua.ketQuaToHop != null and !#lists.isEmpty(ketQua.ketQuaToHop) ? ketQua.ketQuaToHop[0].maToHop : ''}">
+                    </span>,
 
-                        <div class="form-group">
-                            <label>Khu vực ưu tiên:</label>
-                            <select class="form-control" name="khuVuc">
-                                <option value="" th:selected="${khuVuc == null || khuVuc == ''}">Không có</option>
-                                <option value="KV1" th:selected="${khuVuc == 'KV1'}">KV1</option>
-                                <option value="KV2-NT" th:selected="${khuVuc == 'KV2-NT'}">KV2-NT</option>
-                                <option value="KV2" th:selected="${khuVuc == 'KV2'}">KV2</option>
-                                <option value="KV3" th:selected="${khuVuc == 'KV3'}">KV3</option>
-                            </select>
-                        </div>
+                    <span class="highlight-red"
+                        th:if="${ketQua.ketQuaToHop != null and !#lists.isEmpty(ketQua.ketQuaToHop)}"
+                        th:text="${#numbers.formatDecimal(ketQua.ketQuaToHop[0].diemXetTuyen,1,2)}">
+                    </span> điểm.
 
-                        <div class="form-group">
-                            <label>Đối tượng ưu tiên:</label>
-                            <select class="form-control" name="doiTuong">
-                                <option value="" th:selected="${doiTuong == null || doiTuong == ''}">Không có đối tượng</option>
-                                <option value="01" th:selected="${doiTuong == '01'}">Đối tượng 01</option>
-                                <option value="02" th:selected="${doiTuong == '02'}">Đối tượng 02</option>
-                                <option value="03" th:selected="${doiTuong == '03'}">Đối tượng 03</option>
-                                <option value="04" th:selected="${doiTuong == '04'}">Đối tượng 04</option>
-                                <option value="05" th:selected="${doiTuong == '05'}">Đối tượng 05</option>
-                                <option value="06" th:selected="${doiTuong == '06'}">Đối tượng 06</option>
-                                <option value="07" th:selected="${doiTuong == '07'}">Đối tượng 07</option>
-                            </select>
-                        </div>
-                    </div>
+                    Tổ hợp gốc :
 
-                    <div class="form-col">
-                        <div class="form-group">
-                            <label>Điểm môn Toán:</label>
-                            <input class="form-control" type="number" step="0.01" name="toan" th:value="${toan}">
-                        </div>
-                        <div class="form-group">
-                            <label>Điểm môn Ngữ văn:</label>
-                            <input class="form-control" type="number" step="0.01" name="van" th:value="${van}">
-                        </div>
-                        <div class="form-group">
-                            <label>Điểm môn Vật lý:</label>
-                            <input class="form-control" type="number" step="0.01" name="ly" th:value="${ly}">
-                        </div>
-                        <div class="form-group">
-                            <label>Điểm môn Hóa học:</label>
-                            <input class="form-control" type="number" step="0.01" name="hoa" th:value="${hoa}">
-                        </div>
-                    </div>
+                    <span class="chip" th:text="${ketQua.toHopGoc}">
+                    </span>,
 
-                    <div class="form-col">
-                        <div class="form-group">
-                            <label>Điểm môn Sinh học:</label>
-                            <input class="form-control" type="number" step="0.01" name="sinh" th:value="${sinh}">
-                        </div>
-                        <div class="form-group">
-                            <label>Điểm môn Lịch sử:</label>
-                            <input class="form-control" type="number" step="0.01" name="su" th:value="${su}">
-                        </div>
-                        <div class="form-group">
-                            <label>Điểm môn Địa lý:</label>
-                            <input class="form-control" type="number" step="0.01" name="dia" th:value="${dia}">
-                        </div>
-                        <div class="form-group">
-                            <label>Điểm môn Tiếng Anh:</label>
-                            <input class="form-control" type="number" step="0.01" name="tiengAnh" th:value="${tiengAnh}">
-                        </div>
+                    ngưỡng đầu vào:
 
-                        <div class="btn-row">
-                            <button class="btn-primary" type="submit">Tính điểm</button>
-                        </div>
-                    </div>
+                    <span th:text="${ketQua.diemSan != null ? ketQua.diemSan : ''}">
+                    </span>
+                </p>
+                <a class="back-link" th:href="@{/user/home}">Quay lại</a>
+            </div>
+
+            <div class="panel-body">
+                <div class="table-wrap">
+                    <table class="result-table">
+                        <thead>
+                            <tr>
+                                <th>Nội dung</th>
+                                <th>Chi tiết điểm</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td
+                                    th:text="${'Khu vực ưu tiên: ' + (ketQua.khuVucText != null ? ketQua.khuVucText : 'Không có')}">
+                                </td>
+                                <td
+                                    th:text="${#numbers.formatDecimal(ketQua.diemKhuVuc != null ? ketQua.diemKhuVuc : 0,1,2)}">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td
+                                    th:text="${'Đối tượng ưu tiên: ' + (ketQua.doiTuongText != null ? ketQua.doiTuongText : 'Không có')}">
+                                </td>
+                                <td
+                                    th:text="${#numbers.formatDecimal(ketQua.diemDoiTuong != null ? ketQua.diemDoiTuong : 0,1,2)}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Điểm cộng (&lt;= 3)</td>
+                                <td th:text="${#numbers.formatDecimal(diemCong != null ? diemCong : 0,1,2)}"></td>
+                            </tr>
+                        </tbody>
+
+                        <tbody th:each="item, iter : ${ketQua.ketQuaToHop}">
+                            <tr>
+                                <td colspan="2">
+                                    <strong
+                                        th:text="${iter.count + ') Tổ hợp: ' + item.maToHop + ' - ' + item.mon1 + ', ' + item.mon2 + ', ' + item.mon3}"></strong>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td th:text="${'Điểm môn ' + item.maMon1 + ': ' + item.diemMon1Text}"></td>
+                                <td th:text="${item.ctMon1}"></td>
+                            </tr>
+                            <tr>
+                                <td th:text="${'Điểm môn ' + item.maMon2 + ': ' + item.diemMon2Text}"></td>
+                                <td th:text="${item.ctMon2}"></td>
+                            </tr>
+                            <tr>
+                                <td th:text="${'Điểm môn ' + item.maMon3 + ': ' + item.diemMon3Text}"></td>
+                                <td th:text="${item.ctMon3}"></td>
+                            </tr>
+
+                            <tr>
+                                <td>Xét ngưỡng = Tổng điểm 3 môn + điểm ưu tiên</td>
+                                <td th:utext="${item.xetNguongText}"></td>
+                            </tr>
+
+                            <tr>
+                                <td th:text="${'Điểm tổ hợp xét tuyển (ĐTHXT) = ' + item.congThucToHop}"></td>
+                                <td th:utext="${item.diemToHopText}"></td>
+                            </tr>
+
+                            <tr>
+                                <td th:text="${'Độ lệch với TH gốc (' + ketQua.toHopGoc + ')'}"></td>
+                                <td th:text="${item.doLechText}"></td>
+                            </tr>
+
+                            <!-- <tr>
+                                <td>Điểm tổ hợp gốc xét tuyển (ĐTHGXT)</td>
+                                <td th:text="${item.dthgxtText}"></td>
+                            </tr> -->
+
+                            <tr>
+                                <td>Điểm ưu tiên (ĐUT)</td>
+                                <td th:text="${item.diemUuTienText}"></td>
+                            </tr>
+
+                            <tr>
+                                <td>Điểm xét tuyển (ĐXT) = ĐTHGXT + ĐC + ĐƯT - Độ lệch (&lt;=30)</td>
+                                <td th:utext="${item.diemXetTuyenText}"></td>
+                            </tr>
+
+                            <tr>
+                                <td>Kết quả so với điểm sàn</td>
+                                <td>
+                                    <span th:if="${item.datSan}" class="status-ok">Đạt</span>
+                                    <span th:if="${!item.datSan}" class="status-fail">Không đạt</span>
+                                </td>
+                            </tr>
+
+                            <!-- <tr>
+                                <td>Kết quả so với điểm trúng tuyển</td>
+                                <td>
+                                    <span th:if="${item.datTrungTuyen}" class="status-ok">Đạt</span>
+                                    <span th:if="${!item.datTrungTuyen}" class="status-fail">Chưa đạt</span>
+                                </td>
+                            </tr> -->
+                        </tbody>
+                    </table>
                 </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="panel" th:if="${ketQua != null}">
-        <div class="panel-header">
-            <h2 class="section-title">
-                Tính điểm vào ngành xét tuyển:
-                <span class="highlight-red" th:text="${ketQua.tenNganh}"></span>
-                <span class="highlight-red" th:text="${selectedMaNganh != null ? ' (' + selectedMaNganh + ')' : ''}"></span>
-            </h2>
-            <p class="note-text">
-                Tổ hợp có điểm xét tuyển cao nhất:
-                <span class="highlight-red"
-                      th:text="${ketQua.ketQuaToHop != null and !#lists.isEmpty(ketQua.ketQuaToHop) ? ketQua.ketQuaToHop[0].maToHop : ''}"></span>,
-                <span th:if="${ketQua.ketQuaToHop != null and !#lists.isEmpty(ketQua.ketQuaToHop)}"
-                      th:text="${#numbers.formatDecimal(ketQua.ketQuaToHop[0].diemXetTuyen,1,2)}"></span>
-                điểm. Tổ hợp gốc :
-                <span class="chip" th:text="${ketQua.toHopGoc}"></span>,
-                ngưỡng đầu vào:
-                <span th:text="${ketQua.diemSan != null ? ketQua.diemSan : ''}"></span>
-            </p>
-            <a class="back-link" th:href="@{/user/home}">Quay lại</a>
-        </div>
-
-        <div class="panel-body">
-            <div class="table-wrap">
-                <table class="result-table">
-                    <thead>
-                    <tr>
-                        <th>Nội dung</th>
-                        <th>Chi tiết điểm</th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-                    <tr>
-                        <td>Khu vực ưu tiên</td>
-                        <td th:text="${khuVuc != null && khuVuc != '' ? khuVuc : 'Không có'}"></td>
-                    </tr>
-                    <tr>
-                        <td>Đối tượng ưu tiên</td>
-                        <td th:text="${doiTuong != null && doiTuong != '' ? doiTuong : 'Không có đối tượng'}"></td>
-                    </tr>
-                    <tr>
-                        <td>Điểm cộng (&lt;= 3)</td>
-                        <td th:text="${#numbers.formatDecimal(diemCong != null ? diemCong : 0,1,2)}"></td>
-                    </tr>
-                    </tbody>
-
-                    <tbody th:each="item, iter : ${ketQua.ketQuaToHop}">
-                    <tr>
-                        <td colspan="2">
-                            <strong th:text="${iter.count + ') Tổ hợp: ' + item.maToHop + ' - ' + item.mon1 + ', ' + item.mon2 + ', ' + item.mon3}"></strong>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td th:text="${'Điểm môn ' + item.maMon1 + ': ' + item.diemMon1Text}"></td>
-                        <td th:text="${item.ctMon1}"></td>
-                    </tr>
-                    <tr>
-                        <td th:text="${'Điểm môn ' + item.maMon2 + ': ' + item.diemMon2Text}"></td>
-                        <td th:text="${item.ctMon2}"></td>
-                    </tr>
-                    <tr>
-                        <td th:text="${'Điểm môn ' + item.maMon3 + ': ' + item.diemMon3Text}"></td>
-                        <td th:text="${item.ctMon3}"></td>
-                    </tr>
-
-                    <tr>
-                        <td>Xét ngưỡng = Tổng điểm 3 môn + điểm ưu tiên</td>
-                        <td th:text="${item.xetNguongText}"></td>
-                    </tr>
-
-                    <tr>
-                        <td th:text="${'Điểm tổ hợp xét tuyển (ĐTHXT) = ' + item.congThucToHop}"></td>
-                        <td th:text="${item.diemToHopText}"></td>
-                    </tr>
-
-                    <tr>
-                        <td th:text="${'Độ lệch với TH gốc (' + ketQua.toHopGoc + ')'}"></td>
-                        <td th:text="${item.doLechText}"></td>
-                    </tr>
-
-                    <tr>
-                        <td>Điểm tổ hợp gốc xét tuyển (ĐTHGXT)</td>
-                        <td th:text="${item.dthgxtText}"></td>
-                    </tr>
-
-                    <tr>
-                        <td>Điểm ưu tiên (ĐUT)</td>
-                        <td th:text="${item.diemUuTienText}"></td>
-                    </tr>
-
-                    <tr>
-                        <td>Điểm xét tuyển (ĐXT) = ĐTHGXT + ĐC + ĐƯT (&lt;=30)</td>
-                        <td th:text="${item.diemXetTuyenText}"></td>
-                    </tr>
-
-                    <tr>
-                        <td>Kết quả so với điểm sàn</td>
-                        <td>
-                            <span th:if="${item.datSan}" class="status-ok">Đạt</span>
-                            <span th:if="${!item.datSan}" class="status-fail">Không đạt</span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Kết quả so với điểm trúng tuyển</td>
-                        <td>
-                            <span th:if="${item.datTrungTuyen}" class="status-ok">Đạt</span>
-                            <span th:if="${!item.datTrungTuyen}" class="status-fail">Chưa đạt</span>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
-</div>
 </body>
+
 </html>

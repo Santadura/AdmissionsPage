@@ -286,6 +286,7 @@ body {
 }
 
 @media (max-width: 900px) {
+
     .form-grid-2,
     .form-grid-3,
     .home-grid {
@@ -295,4 +296,45 @@ body {
     .page-wrap {
         max-width: calc(100% - 20px);
     }
+}
+
+.chip {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #4db6e2;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    line-height: 1.4;
+}
+
+.badge-yellow,
+.badge-blue,
+.badge-red {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.badge-yellow {
+    background-color: #f1c40f;
+    color: #000;
+}
+
+.badge-blue {
+    background-color: #4db6e2;
+}
+
+.badge-red {
+    background-color: #e74c3c;
+}
+
+.highlight-red {
+    color: #e74c3c;
+    font-weight: bold;
 }

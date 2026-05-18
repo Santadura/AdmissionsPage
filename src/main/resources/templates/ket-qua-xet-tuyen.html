@@ -1,78 +1,93 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Kết quả xét tuyển</title>
     <link rel="stylesheet" th:href="@{/css/ts-style.css}">
 </head>
+
 <body>
-<div class="page-wrap">
-    <div class="panel">
-        <div class="panel-header">
-            <h1 class="page-title">Kết quả xét tuyển</h1>
-            <p class="note-text">Hiển thị kết quả theo nguyện vọng xét tuyển của thí sinh.</p>
-        </div>
-
-        <div class="panel-body">
-            <div class="info-inline">
-                Xin chào <strong th:text="${thiSinh.hoTen}"></strong>
-            </div>
-            <div class="info-inline">
-                <a class="back-link" th:href="@{/user/home}"><strong>Quay lại trang chủ</strong></a>
-            </div>
-            <div class="info-inline">
-                CCCD: <strong th:text="${thiSinh.cccd}"></strong>
+    <div class="page-wrap">
+        <div class="panel">
+            <div class="panel-header">
+                <h1 class="page-title">Kết quả xét tuyển</h1>
+                <p class="note-text">Hiển thị kết quả theo nguyện vọng xét tuyển của thí sinh.</p>
             </div>
 
-            <div class="summary-box">
-                <div class="summary-title">Tổng số nguyện vọng</div>
-                <div class="summary-value" th:text="${#lists.size(ketQuaList)}"></div>
-            </div>
+            <div class="panel-body">
+                <div class="info-inline">
+                    Xin chào <strong th:text="${thiSinh.hoTen}"></strong>
+                </div>
 
-            <div class="summary-box">
-                <div class="summary-title">Trạng thái tra cứu</div>
-                <div class="summary-value">Đã tải dữ liệu</div>
-            </div>
+                <div class="info-inline">
+                    <a class="back-link" th:href="@{/user/home}">
+                        <strong>Quay lại trang chủ</strong>
+                    </a>
+                </div>
 
-            <div th:if="${#lists.isEmpty(ketQuaList)}" class="empty-box">
-                Không tìm thấy dữ liệu xét tuyển của thí sinh.
-            </div>
+                <div class="info-inline">
+                    CCCD: <strong th:text="${thiSinh.cccd}"></strong>
+                </div>
 
-            <div class="table-wrap" th:if="${!#lists.isEmpty(ketQuaList)}">
-                <table class="result-table">
-                    <thead>
-                    <tr>
-                        <th>NV</th>
-                        <th>Mã ngành</th>
-                        <th>Tên ngành</th>
-                        <th>Tổ hợp</th>
-                        <th>Phương thức</th>
-                        <th>Điểm xét tuyển</th>
-                        <th>Điểm trúng tuyển</th>
-                        <th>Kết quả</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="item : ${ketQuaList}">
-                        <td th:text="${item.thuTuNguyenVong}"></td>
-                        <td th:text="${item.maNganh}"></td>
-                        <td th:text="${ketQuaService.getTenNganh(item.maNganh)}"></td>
-                        <td th:text="${item.toHop}"></td>
-                        <td th:text="${item.phuongThuc}"></td>
-                        <td th:text="${item.diemXetTuyen}"></td>
-                        <td th:text="${ketQuaService.getDiemTrungTuyen(item.maNganh)}"></td>
-                        <td>
-                            <span th:if="${ketQuaService.isTrungTuyen(item.ketQua)}" class="status-ok">Trúng tuyển</span>
-                            <span th:if="${!ketQuaService.isTrungTuyen(item.ketQua)}"
-                                  class="status-fail"
-                                  th:text="${item.ketQua}"></span>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                <div class="summary-box">
+                    <div class="summary-title">Tổng số nguyện vọng</div>
+                    <div class="summary-value" th:text="${#lists.size(ketQuaList)}"></div>
+                </div>
+
+                <div class="summary-box">
+                    <div class="summary-title">Trạng thái tra cứu</div>
+                    <div class="summary-value">Đã tải dữ liệu</div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(ketQuaList)}" class="empty-box">
+                    Không tìm thấy dữ liệu xét tuyển của thí sinh.
+                </div>
+
+                <div class="table-wrap" th:if="${!#lists.isEmpty(ketQuaList)}">
+                    <table class="result-table">
+                        <thead>
+                            <tr>
+                                <th>NV</th>
+                                <th>Mã ngành</th>
+                                <th>Tên ngành</th>
+                                <th>Tổ hợp</th>
+                                <th>Phương thức</th>
+                                <th>Điểm xét tuyển</th>
+                                <th>Kết quả</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr th:each="item : ${ketQuaList}">
+                                <td th:text="${item.thuTuNguyenVong}"></td>
+
+                                <td th:text="${item.maNganh}"></td>
+
+                                <td th:text="${ketQuaService.getTenNganh(item.maNganh)}"></td>
+
+                                <td th:text="${ketQuaService.getToHopHienThi(item)}"></td>
+
+                                <td th:text="${ketQuaService.getTenPhuongThuc(item.phuongThuc)}"></td>
+
+                                <td th:text="${item.diemXetTuyen}"></td>
+
+                                <td>
+                                    <span th:if="${ketQuaService.isTrungTuyen(item.ketQua)}" class="status-ok"
+                                        th:text="${ketQuaService.getKetQuaText(item.ketQua)}">
+                                    </span>
+
+                                    <span th:if="${!ketQuaService.isTrungTuyen(item.ketQua)}" class="status-fail"
+                                        th:text="${ketQuaService.getKetQuaText(item.ketQua)}">
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </body>
+
 </html>

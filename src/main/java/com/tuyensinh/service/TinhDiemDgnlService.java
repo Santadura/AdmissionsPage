@@ -44,7 +44,7 @@ public class TinhDiemDgnlService {
             diemTrungTuyen = nganh.getDiemTrungTuyen();
 
             if (nganh.getToHopGoc() != null && !nganh.getToHopGoc().trim().isEmpty()) {
-                toHop = nganh.getToHopGoc().trim();
+                toHop = nganh.getToHopGoc().trim().toUpperCase();
             }
         }
 
@@ -52,11 +52,20 @@ public class TinhDiemDgnlService {
         double diemQuyDoi = (Double) quyDoiInfo.get("diemQuyDoi");
         String congThucQuyDoi = (String) quyDoiInfo.get("congThucQuyDoi");
 
-        double diemUuTien = tinhDiemUuTien(khuVuc, doiTuong);
-        double tongDiem = diemQuyDoi + diemCong + diemUuTien;
+        double mucDiemUuTien = tinhMucUuTien(khuVuc, doiTuong);
+        double diemUuTienQuyDoi;
+        if ((diemQuyDoi + diemCong) < 22.5) {
+            diemUuTienQuyDoi = mucDiemUuTien;
+        } else {
+            diemUuTienQuyDoi = ((30.0 - diemQuyDoi - diemCong) / 7.5) * mucDiemUuTien;
+            if (diemUuTienQuyDoi < 0) diemUuTienQuyDoi = 0;
+        }
+
+        double tongDiem = diemQuyDoi + diemCong + diemUuTienQuyDoi;
+        if (tongDiem > 30) tongDiem = 30;
 
         String dienGiaiTongDiem = String.format("%.2f + %.2f + %.2f = %.2f",
-                diemQuyDoi, diemCong, diemUuTien, tongDiem);
+                diemQuyDoi, diemCong, diemUuTienQuyDoi, tongDiem);
 
         boolean datDiemSan = diemSan != null && tongDiem >= diemSan;
         boolean datDiemTrungTuyen = diemTrungTuyen != null && tongDiem >= diemTrungTuyen;
@@ -68,7 +77,7 @@ public class TinhDiemDgnlService {
         result.put("diemQuyDoi", diemQuyDoi);
         result.put("congThucQuyDoi", congThucQuyDoi);
         result.put("diemCong", diemCong);
-        result.put("diemUuTien", diemUuTien);
+        result.put("diemUuTien", diemUuTienQuyDoi);
         result.put("tongDiem", tongDiem);
         result.put("dienGiaiTongDiem", dienGiaiTongDiem);
         result.put("diemSan", diemSan);
@@ -111,14 +120,15 @@ public class TinhDiemDgnlService {
                 if (Math.abs(diemB - diemA) < 0.000001) {
                     diemQuyDoi = diemC;
                     kq.put("diemQuyDoi", diemQuyDoi);
-                    kq.put("congThucQuyDoi", String.format("%.2f", diemQuyDoi));
+                    kq.put("congThucQuyDoi", String.format("%.2f + (%.0f - %.2f ) / (%.2f - %.2f ) * ( %.2f - %.2f )",
+                            diemC, diemDgnl, diemA, diemB, diemA, diemD, diemC));
                     return kq;
                 }
 
                 double tyLe = (diemDgnl - diemA) / (diemB - diemA);
                 diemQuyDoi = diemC + tyLe * (diemD - diemC);
 
-                String congThuc = String.format("%.2f + (%.2f - %.2f) / (%.2f - %.2f) * (%.2f - %.2f)",
+                String congThuc = String.format("%.2f + (%.0f - %.2f ) / (%.2f - %.2f ) * ( %.2f - %.2f )",
                         diemC, diemDgnl, diemA, diemB, diemA, diemD, diemC);
 
                 kq.put("diemQuyDoi", diemQuyDoi);
@@ -131,7 +141,7 @@ public class TinhDiemDgnlService {
         if (dau.getDiemA() != null && dau.getDiemB() != null && dau.getDiemC() != null
                 && diemDgnl < Math.min(dau.getDiemA(), dau.getDiemB())) {
             kq.put("diemQuyDoi", dau.getDiemC());
-            kq.put("congThucQuyDoi", String.format("Điểm nhỏ hơn khoảng đầu, lấy mốc %.2f", dau.getDiemC()));
+            kq.put("congThucQuyDoi", String.format("%.2f", dau.getDiemC()));
             return kq;
         }
 
@@ -139,7 +149,7 @@ public class TinhDiemDgnlService {
         if (cuoi.getDiemA() != null && cuoi.getDiemB() != null && cuoi.getDiemD() != null
                 && diemDgnl > Math.max(cuoi.getDiemA(), cuoi.getDiemB())) {
             kq.put("diemQuyDoi", cuoi.getDiemD());
-            kq.put("congThucQuyDoi", String.format("Điểm lớn hơn khoảng cuối, lấy mốc %.2f", cuoi.getDiemD()));
+            kq.put("congThucQuyDoi", String.format("%.2f", cuoi.getDiemD()));
             return kq;
         }
 
@@ -149,21 +159,21 @@ public class TinhDiemDgnlService {
         return kq;
     }
 
-    private double tinhDiemUuTien(String khuVuc, String doiTuong) {
+    private double tinhMucUuTien(String khuVuc, String doiTuong) {
         String kv = khuVuc == null ? "" : khuVuc.trim().toUpperCase();
         String dt = doiTuong == null ? "" : doiTuong.trim().toUpperCase();
 
         double diemKhuVuc = switch (kv) {
-            case "KV1" -> 0.75;
-            case "KV2-NT" -> 0.50;
-            case "KV2" -> 0.25;
+            case "KV1", "1", "1A" -> 0.75;
+            case "KV2-NT", "2NT" -> 0.50;
+            case "KV2", "2" -> 0.25;
             default -> 0.0;
         };
 
         double diemDoiTuong = switch (dt) {
-            case "01" -> 2.0;
+            case "01", "01A" -> 2.0;
             case "02", "03", "04" -> 1.0;
-            case "05", "06", "07" -> 0.5;
+            case "05", "06", "07", "06A" -> 0.5;
             default -> 0.0;
         };
 
