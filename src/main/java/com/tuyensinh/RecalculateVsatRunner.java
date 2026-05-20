@@ -59,7 +59,7 @@ public class RecalculateVsatRunner {
                     JOIN xt_diemthixettuyen d
                         ON d.cccd = CONCAT('TS_', nv.nn_cccd)
 
-                    WHERE nv.tt_phuongthuc = 3
+                    WHERE nv.tt_phuongthuc = 5
                 """;
 
         String updateSql = """
