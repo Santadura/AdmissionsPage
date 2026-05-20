@@ -4,19 +4,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class RecalculateVsatRunner {
+public class RecalculateThptRunner {
 
     private static final String URL = "jdbc:mysql://localhost:3306/tuyen_sinh_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh";
 
     private static final String USER = "root";
     private static final String PASSWORD = "123456";
-
-    private static final Map<String, List<QuyDoiRange>> BANG_QUY_DOI = new HashMap<>();
 
     public static void main(String[] args) {
 
@@ -29,8 +25,6 @@ public class RecalculateVsatRunner {
                     nv.diem_cong,
                     nv.diem_utqd,
                     nv.diem_xettuyen,
-
-                    n.n_tohopgoc,
 
                     th.th_mon1,
                     th.hsmon1,
@@ -47,12 +41,14 @@ public class RecalculateVsatRunner {
                     d.VA,
                     d.SU,
                     d.DI,
-                    d.N1_THI
+                    d.N1_THI,
+                    d.KTPL,
+                    d.NK1,
+                    d.NK2,
+                    d.NK3,
+                    d.NK4
 
                 FROM xt_nguyenvongxettuyen nv
-
-                JOIN xt_nganh n
-                    ON CAST(n.manganh AS CHAR) = CAST(nv.nv_manganh AS CHAR)
 
                 JOIN xt_nganh_tohop th
                     ON CAST(th.manganh AS CHAR) = CAST(nv.nv_manganh AS CHAR)
@@ -61,7 +57,7 @@ public class RecalculateVsatRunner {
                 JOIN xt_diemthixettuyen d
                     ON d.cccd = CONCAT('TS_', nv.nn_cccd)
 
-                WHERE nv.tt_phuongthuc = 5
+                WHERE nv.tt_phuongthuc = 3
                 """;
 
         String updateSql = """
@@ -75,16 +71,12 @@ public class RecalculateVsatRunner {
                 PreparedStatement ps = conn.prepareStatement(sql);
                 PreparedStatement updatePs = conn.prepareStatement(updateSql);
                 ResultSet rs = ps.executeQuery()) {
-
             conn.setAutoCommit(false);
-
-            loadBangQuyDoi(conn);
 
             int total = 0;
             int changed = 0;
 
             while (rs.next()) {
-
                 total++;
 
                 int idnv = rs.getInt("idnv");
@@ -100,8 +92,6 @@ public class RecalculateVsatRunner {
                 double hs2 = rs.getDouble("hsmon2");
                 double hs3 = rs.getDouble("hsmon3");
 
-                double doLech = rs.getDouble("dolech");
-
                 if (hs1 <= 0)
                     hs1 = 1.0;
                 if (hs2 <= 0)
@@ -109,30 +99,24 @@ public class RecalculateVsatRunner {
                 if (hs3 <= 0)
                     hs3 = 1.0;
 
-                double g1 = layDiemGoc(rs, mon1);
-                double g2 = layDiemGoc(rs, mon2);
-                double g3 = layDiemGoc(rs, mon3);
-
-                double d1 = quyDoiVsat(mon1, g1);
-                double d2 = quyDoiVsat(mon2, g2);
-                double d3 = quyDoiVsat(mon3, g3);
+                double d1 = layDiem(rs, mon1);
+                double d2 = layDiem(rs, mon2);
+                double d3 = layDiem(rs, mon3);
 
                 double tongHeSo = hs1 + hs2 + hs3;
 
                 double dthxt = ((d1 * hs1) + (d2 * hs2) + (d3 * hs3))
                         / tongHeSo * 3.0;
 
+                double doLech = rs.getDouble("dolech");
                 double dthgxt = dthxt - doLech;
 
                 double diemUuTien;
 
                 if ((dthgxt + diemCong) < 22.5) {
-
                     diemUuTien = diemUt;
-
                 } else {
-
-                    diemUuTien = ((30.0 - dthgxt - diemCong) / 7.5) * diemUt;
+                    diemUuTien = ((30.0 - dthxt - diemCong) / 7.5) * diemUt;
 
                     if (diemUuTien < 0) {
                         diemUuTien = 0;
@@ -150,21 +134,16 @@ public class RecalculateVsatRunner {
                 double diemCu = rs.getDouble("diem_xettuyen");
 
                 if (Math.abs(diemMoi - diemCu) > 0.001) {
-
                     updatePs.setDouble(1, diemMoi);
                     updatePs.setInt(2, idnv);
                     updatePs.addBatch();
-
                     changed++;
                 }
 
                 if (changed > 0 && changed % 500 == 0) {
-
                     updatePs.executeBatch();
                     conn.commit();
-
-                    System.out.println(
-                            "Da update " + changed + " dong...");
+                    System.out.println("Da update " + changed + " dong...");
                 }
             }
 
@@ -172,7 +151,7 @@ public class RecalculateVsatRunner {
             conn.commit();
 
             System.out.println("Hoan tat.");
-            System.out.println("Tong dong VSAT doc duoc: " + total);
+            System.out.println("Tong dong THPT doc duoc: " + total);
             System.out.println("Tong dong duoc update: " + changed);
 
         } catch (Exception e) {
@@ -180,50 +159,7 @@ public class RecalculateVsatRunner {
         }
     }
 
-    private static void loadBangQuyDoi(Connection conn) throws Exception {
-
-        String sql = """
-                SELECT
-                    d_mon,
-                    d_diema,
-                    d_diemb,
-                    d_diemc,
-                    d_diemd
-                FROM xt_bangquydoi
-                WHERE d_phuongthuc = 'VSAT'
-                """;
-
-        try (
-                PreparedStatement ps = conn.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-
-                String mon = safe(rs.getString("d_mon"));
-
-                QuyDoiRange range = new QuyDoiRange(
-                        rs.getDouble("d_diema"),
-                        rs.getDouble("d_diemb"),
-                        rs.getDouble("d_diemc"),
-                        rs.getDouble("d_diemd"));
-
-                BANG_QUY_DOI
-                        .computeIfAbsent(mon,
-                                k -> new ArrayList<>())
-                        .add(range);
-            }
-        }
-
-        System.out.println(
-                "Da load bang quy doi VSAT: "
-                        + BANG_QUY_DOI.size()
-                        + " mon.");
-    }
-
-    private static double layDiemGoc(
-            ResultSet rs,
-            String mon) throws Exception {
-
+    private static double layDiem(ResultSet rs, String mon) throws Exception {
         if (mon == null) {
             return 0.0;
         }
@@ -239,6 +175,12 @@ public class RecalculateVsatRunner {
         map.put("DI", "DI");
         map.put("N1", "N1_THI");
         map.put("TI", "N1_THI");
+        map.put("KTPL", "KTPL");
+
+        map.put("NK1", "NK1");
+        map.put("NK2", "NK2");
+        map.put("NK3", "NK3");
+        map.put("NK4", "NK4");
 
         String cot = map.get(mon.trim().toUpperCase());
 
@@ -247,67 +189,5 @@ public class RecalculateVsatRunner {
         }
 
         return rs.getDouble(cot);
-    }
-
-    private static double quyDoiVsat(
-            String mon,
-            double diemGoc) {
-
-        String maMon = safe(mon);
-
-        List<QuyDoiRange> ds = BANG_QUY_DOI.get(maMon);
-
-        if (ds == null || ds.isEmpty()) {
-            return 0.0;
-        }
-
-        for (QuyDoiRange r : ds) {
-
-            double min = Math.min(r.a, r.b);
-
-            double max = Math.max(r.a, r.b);
-
-            if (diemGoc >= min
-                    && diemGoc <= max) {
-
-                if (Math.abs(r.b - r.a) < 0.000001) {
-
-                    return r.c;
-                }
-
-                return r.c
-                        + ((diemGoc - r.a)
-                                / (r.b - r.a))
-                                * (r.d - r.c);
-            }
-        }
-
-        return 0.0;
-    }
-
-    private static String safe(String s) {
-
-        return s == null
-                ? ""
-                : s.trim().toUpperCase();
-    }
-
-    private static class QuyDoiRange {
-
-        double a;
-        double b;
-        double c;
-        double d;
-
-        QuyDoiRange(
-                double a,
-                double b,
-                double c,
-                double d) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
-            this.d = d;
-        }
     }
 }
