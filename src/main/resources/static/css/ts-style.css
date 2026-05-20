@@ -10,6 +10,16 @@ body {
     color: #333;
 }
 
+.error-box {
+    margin: 16px 0;
+    padding: 14px 18px;
+    border: 1px solid #f5c2c7;
+    background: #f8d7da;
+    color: #842029;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
 .page-wrap {
     width: 1180px;
     max-width: calc(100% - 40px);

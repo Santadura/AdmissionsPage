@@ -19,7 +19,7 @@ public class TinhDiemController {
     private final TinhDiemDgnlService tinhDiemDgnlService;
 
     public TinhDiemController(NganhRepository nganhRepository,
-                              TinhDiemDgnlService tinhDiemDgnlService) {
+            TinhDiemDgnlService tinhDiemDgnlService) {
         this.nganhRepository = nganhRepository;
         this.tinhDiemDgnlService = tinhDiemDgnlService;
     }
@@ -38,28 +38,43 @@ public class TinhDiemController {
 
     @PostMapping("/user/tinh-diem/dgnl")
     public String tinhDiemDgnl(@RequestParam("diemDgnl") Double diemDgnl,
-                               @RequestParam("maNganh") String maNganh,
-                               @RequestParam(value = "khuVuc", required = false) String khuVuc,
-                               @RequestParam(value = "doiTuong", required = false) String doiTuong,
-                               @RequestParam(value = "diemCong", required = false) Double diemCong,
-                               HttpSession session,
-                               Model model) {
+            @RequestParam("maNganh") String maNganh,
+            @RequestParam(value = "khuVuc", required = false) String khuVuc,
+            @RequestParam(value = "doiTuong", required = false) String doiTuong,
+            @RequestParam(value = "diemCong", required = false) Double diemCong,
+            HttpSession session,
+            Model model) {
+
         ThiSinh thiSinh = (ThiSinh) session.getAttribute("loggedInThiSinh");
+
         if (thiSinh == null) {
             return "redirect:/login";
         }
 
-        var ketQua = tinhDiemDgnlService.tinhDiem(diemDgnl, maNganh, khuVuc, doiTuong, diemCong);
-
         model.addAttribute("thiSinh", thiSinh);
         model.addAttribute("dsNganh", nganhRepository.findAll());
-        model.addAttribute("ketQua", ketQua);
 
         model.addAttribute("selectedMaNganh", maNganh);
         model.addAttribute("diemDgnl", diemDgnl);
         model.addAttribute("diemCong", diemCong);
         model.addAttribute("khuVuc", khuVuc);
         model.addAttribute("doiTuong", doiTuong);
+
+        try {
+
+            var ketQua = tinhDiemDgnlService.tinhDiem(
+                    diemDgnl,
+                    maNganh,
+                    khuVuc,
+                    doiTuong,
+                    diemCong);
+
+            model.addAttribute("ketQua", ketQua);
+
+        } catch (RuntimeException ex) {
+
+            model.addAttribute("error", ex.getMessage());
+        }
 
         return "tinh-diem-dgnl";
     }

@@ -498,9 +498,8 @@ public class TinhDiemThptService {
         String dt = safe(doiTuong);
 
         return switch (dt) {
-            case "01", "01A" -> 2.0;
-            case "02", "03", "04" -> 1.0;
-            case "05", "06", "07", "06A" -> 0.5;
+            case "01", "01A", "02", "03", "04" -> 2.0;
+            case "05", "06", "06A", "07" -> 1.0;
             default -> 0.0;
         };
     }

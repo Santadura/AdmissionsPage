@@ -82,6 +82,9 @@
                         </div>
                     </div>
                 </form>
+                <div th:if="${error != null}" class="error-box">
+                    <span th:text="${error}"></span>
+                </div>
             </div>
         </div>
 

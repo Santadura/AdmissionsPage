@@ -23,58 +23,70 @@ public class TinhDiemDgnlService {
         this.bangQuyDoiRepository = bangQuyDoiRepository;
     }
 
-    public Map<String, Object> tinhDiem(Double diemDgnl, String maNganh, String khuVuc, String doiTuong,
+    public Map<String, Object> tinhDiem(Double diemDgnl,
+            String maNganh,
+            String khuVuc,
+            String doiTuong,
             Double diemCong) {
+
         Map<String, Object> result = new LinkedHashMap<>();
 
-        if (diemDgnl == null)
+        if (diemDgnl == null) {
             diemDgnl = 0.0;
-        if (diemCong == null)
+        }
+        if (diemCong == null) {
             diemCong = 0.0;
-        if (khuVuc == null)
+        }
+        if (khuVuc == null) {
             khuVuc = "";
-        if (doiTuong == null)
+        }
+        if (doiTuong == null) {
             doiTuong = "";
+        }
 
         Nganh nganh = nganhRepository.findByMaNganh(maNganh).orElse(null);
 
-        String tenNganh = "";
+        if (nganh == null) {
+            throw new RuntimeException("Không tìm thấy ngành xét tuyển.");
+        }
+
+        String tenNganh = nganh.getTenNganh();
         String toHop = "D01";
-        Double diemSan = null;
-        Double diemTrungTuyen = null;
+        Double diemSan = nganh.getDiemSan();
+        Double diemTrungTuyen = nganh.getDiemTrungTuyen();
 
-        if (nganh != null) {
-            tenNganh = nganh.getTenNganh();
-            diemSan = nganh.getDiemSan();
-            diemTrungTuyen = nganh.getDiemTrungTuyen();
-
-            if (nganh.getToHopGoc() != null && !nganh.getToHopGoc().trim().isEmpty()) {
-                toHop = nganh.getToHopGoc().trim().toUpperCase();
-            }
+        if (nganh.getToHopGoc() != null && !nganh.getToHopGoc().trim().isEmpty()) {
+            toHop = nganh.getToHopGoc().trim().toUpperCase();
         }
 
         Map<String, Object> quyDoiInfo = timDiemQuyDoiDgnlVaCongThuc(diemDgnl, toHop);
+
         double diemQuyDoi = (Double) quyDoiInfo.get("diemQuyDoi");
         String congThucQuyDoi = (String) quyDoiInfo.get("congThucQuyDoi");
 
         double mucDiemUuTien = tinhMucUuTien(khuVuc, doiTuong);
+
         double diemUuTienQuyDoi;
+
         if ((diemQuyDoi + diemCong) < 22.5) {
             diemUuTienQuyDoi = mucDiemUuTien;
         } else {
             diemUuTienQuyDoi = ((30.0 - diemQuyDoi - diemCong) / 7.5) * mucDiemUuTien;
-            if (diemUuTienQuyDoi < 0)
+
+            if (diemUuTienQuyDoi < 0) {
                 diemUuTienQuyDoi = 0;
+            }
         }
 
-        diemQuyDoi = Math.round(diemQuyDoi * 100.0) / 100.0;
-        diemUuTienQuyDoi = Math.round(diemUuTienQuyDoi * 100.0) / 100.0;
+        diemQuyDoi = round2(diemQuyDoi);
+        diemUuTienQuyDoi = round2(diemUuTienQuyDoi);
 
         double tongDiem = diemQuyDoi + diemCong + diemUuTienQuyDoi;
+        tongDiem = round2(tongDiem);
 
-        tongDiem = Math.round(tongDiem * 100.0) / 100.0;
-        if (tongDiem > 30)
+        if (tongDiem > 30) {
             tongDiem = 30;
+        }
 
         String dienGiaiTongDiem = String.format("%.2f + %.2f + %.2f = %.2f",
                 diemQuyDoi, diemCong, diemUuTienQuyDoi, tongDiem);
@@ -104,13 +116,13 @@ public class TinhDiemDgnlService {
 
     private Map<String, Object> timDiemQuyDoiDgnlVaCongThuc(Double diemDgnl, String toHop) {
         Map<String, Object> kq = new LinkedHashMap<>();
+
         List<BangQuyDoi> ds = bangQuyDoiRepository.findByPhuongThucAndToHopOrderByPhanViAsc("DGNL", toHop);
 
         if (ds == null || ds.isEmpty()) {
-            double macDinh = diemDgnl * 30.0 / 1200.0;
-            kq.put("diemQuyDoi", macDinh);
-            kq.put("congThucQuyDoi", String.format("%.2f x 30 / 1200 = %.2f", diemDgnl, macDinh));
-            return kq;
+            throw new RuntimeException(
+                    "Ngành này chưa hỗ trợ tính điểm ĐGNL vì chưa có bảng quy đổi cho tổ hợp gốc "
+                            + toHop + ".");
         }
 
         for (BangQuyDoi item : ds) {
@@ -132,15 +144,15 @@ public class TinhDiemDgnlService {
                 if (Math.abs(diemB - diemA) < 0.000001) {
                     diemQuyDoi = diemC;
                     kq.put("diemQuyDoi", diemQuyDoi);
-                    kq.put("congThucQuyDoi", String.format("%.2f + (%.0f - %.2f ) / (%.2f - %.2f ) * ( %.2f - %.2f )",
-                            diemC, diemDgnl, diemA, diemB, diemA, diemD, diemC));
+                    kq.put("congThucQuyDoi",
+                            String.format("%.2f", diemQuyDoi));
                     return kq;
                 }
 
                 double tyLe = (diemDgnl - diemA) / (diemB - diemA);
                 diemQuyDoi = diemC + tyLe * (diemD - diemC);
 
-                String congThuc = String.format("%.2f + (%.0f - %.2f ) / (%.2f - %.2f ) * ( %.2f - %.2f )",
+                String congThuc = String.format("%.2f + (%.0f - %.2f) / (%.2f - %.2f) * (%.2f - %.2f)",
                         diemC, diemDgnl, diemA, diemB, diemA, diemD, diemC);
 
                 kq.put("diemQuyDoi", diemQuyDoi);
@@ -149,26 +161,9 @@ public class TinhDiemDgnlService {
             }
         }
 
-        BangQuyDoi dau = ds.get(0);
-        if (dau.getDiemA() != null && dau.getDiemB() != null && dau.getDiemC() != null
-                && diemDgnl < Math.min(dau.getDiemA(), dau.getDiemB())) {
-            kq.put("diemQuyDoi", dau.getDiemC());
-            kq.put("congThucQuyDoi", String.format("%.2f", dau.getDiemC()));
-            return kq;
-        }
-
-        BangQuyDoi cuoi = ds.get(ds.size() - 1);
-        if (cuoi.getDiemA() != null && cuoi.getDiemB() != null && cuoi.getDiemD() != null
-                && diemDgnl > Math.max(cuoi.getDiemA(), cuoi.getDiemB())) {
-            kq.put("diemQuyDoi", cuoi.getDiemD());
-            kq.put("congThucQuyDoi", String.format("%.2f", cuoi.getDiemD()));
-            return kq;
-        }
-
-        double macDinh = diemDgnl * 30.0 / 1200.0;
-        kq.put("diemQuyDoi", macDinh);
-        kq.put("congThucQuyDoi", String.format("%.2f x 30 / 1200 = %.2f", diemDgnl, macDinh));
-        return kq;
+        throw new RuntimeException(
+                "Điểm ĐGNL " + String.format("%.0f", diemDgnl)
+                        + " không nằm trong khoảng quy đổi của tổ hợp gốc " + toHop + ".");
     }
 
     private double tinhMucUuTien(String khuVuc, String doiTuong) {
@@ -183,12 +178,15 @@ public class TinhDiemDgnlService {
         };
 
         double diemDoiTuong = switch (dt) {
-            case "01", "01A" -> 2.0;
-            case "02", "03", "04" -> 1.0;
-            case "05", "06", "07", "06A" -> 0.5;
+            case "01", "01A", "02", "03", "04" -> 2.0;
+            case "05", "06", "06A", "07" -> 1.0;
             default -> 0.0;
         };
 
         return diemKhuVuc + diemDoiTuong;
+    }
+
+    private double round2(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 }
