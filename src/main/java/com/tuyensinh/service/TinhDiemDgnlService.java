@@ -18,18 +18,23 @@ public class TinhDiemDgnlService {
     private final BangQuyDoiRepository bangQuyDoiRepository;
 
     public TinhDiemDgnlService(NganhRepository nganhRepository,
-                               BangQuyDoiRepository bangQuyDoiRepository) {
+            BangQuyDoiRepository bangQuyDoiRepository) {
         this.nganhRepository = nganhRepository;
         this.bangQuyDoiRepository = bangQuyDoiRepository;
     }
 
-    public Map<String, Object> tinhDiem(Double diemDgnl, String maNganh, String khuVuc, String doiTuong, Double diemCong) {
+    public Map<String, Object> tinhDiem(Double diemDgnl, String maNganh, String khuVuc, String doiTuong,
+            Double diemCong) {
         Map<String, Object> result = new LinkedHashMap<>();
 
-        if (diemDgnl == null) diemDgnl = 0.0;
-        if (diemCong == null) diemCong = 0.0;
-        if (khuVuc == null) khuVuc = "";
-        if (doiTuong == null) doiTuong = "";
+        if (diemDgnl == null)
+            diemDgnl = 0.0;
+        if (diemCong == null)
+            diemCong = 0.0;
+        if (khuVuc == null)
+            khuVuc = "";
+        if (doiTuong == null)
+            doiTuong = "";
 
         Nganh nganh = nganhRepository.findByMaNganh(maNganh).orElse(null);
 
@@ -58,11 +63,18 @@ public class TinhDiemDgnlService {
             diemUuTienQuyDoi = mucDiemUuTien;
         } else {
             diemUuTienQuyDoi = ((30.0 - diemQuyDoi - diemCong) / 7.5) * mucDiemUuTien;
-            if (diemUuTienQuyDoi < 0) diemUuTienQuyDoi = 0;
+            if (diemUuTienQuyDoi < 0)
+                diemUuTienQuyDoi = 0;
         }
 
+        diemQuyDoi = Math.round(diemQuyDoi * 100.0) / 100.0;
+        diemUuTienQuyDoi = Math.round(diemUuTienQuyDoi * 100.0) / 100.0;
+
         double tongDiem = diemQuyDoi + diemCong + diemUuTienQuyDoi;
-        if (tongDiem > 30) tongDiem = 30;
+
+        tongDiem = Math.round(tongDiem * 100.0) / 100.0;
+        if (tongDiem > 30)
+            tongDiem = 30;
 
         String dienGiaiTongDiem = String.format("%.2f + %.2f + %.2f = %.2f",
                 diemQuyDoi, diemCong, diemUuTienQuyDoi, tongDiem);

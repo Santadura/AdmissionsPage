@@ -78,7 +78,7 @@ public class KetQuaXetTuyenService {
         String value = phuongThuc.trim();
 
         return switch (value) {
-            case "2" -> "V-SAT";
+            case "5" -> "V-SAT";
             case "3" -> "THPT";
             case "4" -> "ĐGNL";
             default -> "Không xác định";

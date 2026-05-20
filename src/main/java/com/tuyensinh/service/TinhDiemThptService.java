@@ -25,7 +25,9 @@ public class TinhDiemThptService {
         this.nganhToHopRepository = nganhToHopRepository;
     }
 
-    public Map<String, Object> tinhDiem(String maNganh,
+    public Map<String, Object> tinhDiem(
+            String phuongThuc,
+            String maNganh,
             Double toan,
             Double ly,
             Double hoa,
@@ -34,9 +36,18 @@ public class TinhDiemThptService {
             Double su,
             Double dia,
             Double tiengAnh,
+            Double nk1,
+            Double nk2,
+            Double nk3,
+            Double nk4,
             String khuVuc,
             String doiTuong,
             Double diemCong) {
+
+        if (phuongThuc == null || phuongThuc.trim().isEmpty()) {
+            phuongThuc = "VSAT";
+        }
+        phuongThuc = phuongThuc.trim().toUpperCase();
 
         if (toan == null)
             toan = 0.0;
@@ -60,6 +71,18 @@ public class TinhDiemThptService {
             khuVuc = "";
         if (doiTuong == null)
             doiTuong = "";
+
+        if (nk1 == null)
+            nk1 = 0.0;
+
+        if (nk2 == null)
+            nk2 = 0.0;
+
+        if (nk3 == null)
+            nk3 = 0.0;
+
+        if (nk4 == null)
+            nk4 = 0.0;
 
         Nganh nganh = nganhRepository.findByMaNganh(maNganh).orElse(null);
         List<NganhToHop> dsToHop = nganhToHopRepository.findByMaNganh(maNganh);
@@ -86,10 +109,13 @@ public class TinhDiemThptService {
         diemGoc.put("DI", dia);
         diemGoc.put("N1", tiengAnh);
         diemGoc.put("TI", tiengAnh);
+        diemGoc.put("NK1", nk1);
+        diemGoc.put("NK2", nk2);
+        diemGoc.put("NK3", nk3);
+        diemGoc.put("NK4", nk4);
 
         double diemKhuVuc = tinhDiemKhuVuc(khuVuc);
         double diemDoiTuong = tinhDiemDoiTuong(doiTuong);
-
         double mucDiemUuTien = diemKhuVuc + diemDoiTuong;
 
         List<Map<String, Object>> ketQuaToHop = new ArrayList<>();
@@ -109,9 +135,9 @@ public class TinhDiemThptService {
             double g2 = diemGoc.getOrDefault(mon2, 0.0);
             double g3 = diemGoc.getOrDefault(mon3, 0.0);
 
-            QuyDoiMon q1 = quyDoiVsat(mon1, g1);
-            QuyDoiMon q2 = quyDoiVsat(mon2, g2);
-            QuyDoiMon q3 = quyDoiVsat(mon3, g3);
+            QuyDoiMon q1 = xuLyDiemMon(phuongThuc, mon1, g1);
+            QuyDoiMon q2 = xuLyDiemMon(phuongThuc, mon2, g2);
+            QuyDoiMon q3 = xuLyDiemMon(phuongThuc, mon3, g3);
 
             double xetNguong = q1.diemQuyDoi + q2.diemQuyDoi + q3.diemQuyDoi + mucDiemUuTien;
 
@@ -124,7 +150,7 @@ public class TinhDiemThptService {
             if ((dthgxt + diemCong) < 22.5) {
                 dut = mucDiemUuTien;
             } else {
-                dut = ((30.0 - dthgxt - diemCong) / 7.5) * mucDiemUuTien;
+                dut = ((30.0 - dthxt - diemCong) / 7.5) * mucDiemUuTien;
                 if (dut < 0)
                     dut = 0;
             }
@@ -134,7 +160,7 @@ public class TinhDiemThptService {
                 dxt = 30;
 
             boolean datSan = diemSan != null && dxt >= diemSan;
-            boolean datTrungTuyen = diemTrungTuyen != null && dxt >= diemTrungTuyen;
+            boolean datTrungTuyen = diemTrungTuyen != null && diemTrungTuyen > 0 && dxt >= diemTrungTuyen;
 
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("maToHop", maToHop);
@@ -181,6 +207,7 @@ public class TinhDiemThptService {
         ketQuaToHop.sort(Comparator.comparing((Map<String, Object> m) -> (Double) m.get("diemXetTuyen")).reversed());
 
         Map<String, Object> result = new LinkedHashMap<>();
+        result.put("phuongThuc", phuongThuc);
         result.put("maNganh", maNganh);
         result.put("tenNganh", tenNganh);
         result.put("toHopGoc", toHopGoc);
@@ -189,12 +216,37 @@ public class TinhDiemThptService {
         result.put("diemUuTien", mucDiemUuTien);
         result.put("khuVucText", hienThiKhuVuc(khuVuc));
         result.put("doiTuongText", hienThiDoiTuong(doiTuong));
-
         result.put("diemKhuVuc", diemKhuVuc);
         result.put("diemDoiTuong", diemDoiTuong);
         result.put("ketQuaToHop", ketQuaToHop);
 
         return result;
+    }
+
+    private QuyDoiMon xuLyDiemMon(String phuongThuc, String mon, double diem) {
+
+        String m = safe(mon);
+
+        // Môn năng khiếu chỉ dùng cho THPT
+        if (m.startsWith("NK")) {
+
+            if (!"THPT".equalsIgnoreCase(phuongThuc)) {
+                return new QuyDoiMon(0.0,
+                        "Môn năng khiếu không áp dụng cho phương thức VSAT");
+            }
+
+            return new QuyDoiMon(diem,
+                    String.format("Điểm năng khiếu dùng trực tiếp = %.2f", diem));
+        }
+
+        // THPT
+        if ("THPT".equalsIgnoreCase(phuongThuc)) {
+            return new QuyDoiMon(diem,
+                    String.format("Điểm THPT dùng trực tiếp = %.2f", diem));
+        }
+
+        // VSAT
+        return quyDoiVsat(mon, diem);
     }
 
     private String safe(String s) {
@@ -211,29 +263,14 @@ public class TinhDiemThptService {
             case "SU" -> "Lịch sử";
             case "DI" -> "Địa lí";
             case "N1", "TI" -> "Tiếng Anh";
+
+            case "NK1" -> "Năng khiếu 1";
+            case "NK2" -> "Năng khiếu 2";
+            case "NK3" -> "Năng khiếu 3";
+            case "NK4" -> "Năng khiếu 4";
+
             default -> maMon;
         };
-    }
-
-    private double tinhMucUuTien(String khuVuc, String doiTuong) {
-        String kv = safe(khuVuc);
-        String dt = safe(doiTuong);
-
-        double diemKhuVuc = switch (kv) {
-            case "KV1", "1", "1A" -> 0.75;
-            case "KV2-NT", "2NT" -> 0.50;
-            case "KV2", "2" -> 0.25;
-            default -> 0.0;
-        };
-
-        double diemDoiTuong = switch (dt) {
-            case "01", "01A" -> 2.0;
-            case "02", "03", "04" -> 1.0;
-            case "05", "06", "07", "06A" -> 0.5;
-            default -> 0.0;
-        };
-
-        return diemKhuVuc + diemDoiTuong;
     }
 
     private double layDoLech(String toHopGoc, String maToHop) {
@@ -416,7 +453,7 @@ public class TinhDiemThptService {
             }
         }
 
-        return new QuyDoiMon(0.0, "Lỗi, điểm nhập vào không nằm trong phân vị nào = 0");
+        return new QuyDoiMon(0.0, "Không có dữ liệu quy đổi phù hợp, tính = 0");
     }
 
     private String hienThiKhuVuc(String khuVuc) {

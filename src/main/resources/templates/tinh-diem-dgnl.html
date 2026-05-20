@@ -22,12 +22,18 @@
                         <div class="form-col">
                             <div class="form-group">
                                 <label>Chọn ngành:</label>
-                                <select class="form-control" name="maNganh" required>
-                                    <option value="">-- Chọn ngành --</option>
-                                    <option th:each="nganh : ${dsNganh}" th:value="${nganh.maNganh}"
-                                        th:text="${nganh.tenNganh}" th:selected="${nganh.maNganh == selectedMaNganh}">
+
+                                <input class="form-control" list="dsNganhList" id="nganhInput"
+                                    placeholder="Nhập tên ngành hoặc mã ngành..."
+                                    th:value="${selectedMaNganh != null ? selectedMaNganh : ''}" required>
+
+                                <input type="hidden" name="maNganh" id="maNganhHidden" th:value="${selectedMaNganh}">
+
+                                <datalist id="dsNganhList">
+                                    <option th:each="nganh : ${dsNganh}"
+                                        th:value="${nganh.maNganh + ' - ' + nganh.tenNganh}">
                                     </option>
-                                </select>
+                                </datalist>
                             </div>
 
                             <div class="form-group">
@@ -154,5 +160,21 @@
         </div>
     </div>
 </body>
+<script>
+    const nganhInput = document.getElementById("nganhInput");
+    const maNganhHidden = document.getElementById("maNganhHidden");
+
+    if (nganhInput && maNganhHidden) {
+        nganhInput.addEventListener("input", function () {
+            const value = nganhInput.value.trim();
+
+            if (value.includes(" - ")) {
+                maNganhHidden.value = value.split(" - ")[0].trim();
+            } else {
+                maNganhHidden.value = value;
+            }
+        });
+    }
+</script>
 
 </html>

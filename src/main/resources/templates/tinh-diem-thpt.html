@@ -12,8 +12,13 @@
         <div class="panel">
             <div class="panel-header">
                 <h1 class="page-title">Công cụ tham khảo tính điểm xét tuyển</h1>
-                <div class="sub-title">Điểm thi VSAT (thang điểm 150)</div>
-                <p class="note-text">Môn thi không có điểm: nhập 0.</p>
+                <div class="sub-title"
+                    th:text="${phuongThuc == 'THPT' ? 'Điểm thi THPT (thang điểm 10)' : 'Điểm thi VSAT (thang điểm 150)'}">
+                    Điểm thi VSAT (thang điểm 150)
+                </div>
+                <p class="note-text">
+                    Chọn đúng phương thức trước khi nhập điểm. THPT dùng điểm trực tiếp, VSAT sẽ quy đổi về thang 10.
+                </p>
             </div>
 
             <div class="panel-body">
@@ -22,11 +27,32 @@
                         <div class="form-col">
                             <div class="form-group">
                                 <label>Chọn ngành:</label>
-                                <select class="form-control" name="maNganh" required>
-                                    <option value="">-- Chọn ngành --</option>
-                                    <option th:each="nganh : ${dsNganh}" th:value="${nganh.maNganh}"
-                                        th:text="${nganh.tenNganh}" th:selected="${nganh.maNganh == selectedMaNganh}">
+
+                                <input class="form-control" list="dsNganhList" id="nganhInput"
+                                    placeholder="Nhập tên ngành hoặc mã ngành..."
+                                    th:value="${selectedMaNganh != null ? selectedMaNganh : ''}" required>
+
+                                <input type="hidden" name="maNganh" id="maNganhHidden" th:value="${selectedMaNganh}">
+
+                                <datalist id="dsNganhList">
+                                    <option th:each="nganh : ${dsNganh}"
+                                        th:value="${nganh.maNganh + ' - ' + nganh.tenNganh}">
                                     </option>
+                                </datalist>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Phương thức:</label>
+                                <select id="phuongThuc" name="phuongThuc" class="form-control">
+
+                                    <option value="VSAT" th:selected="${phuongThuc == null || phuongThuc == 'VSAT'}">
+                                        VSAT - điểm thang 150
+                                    </option>
+
+                                    <option value="THPT" th:selected="${phuongThuc == 'THPT'}">
+                                        THPT - điểm thang 10
+                                    </option>
+
                                 </select>
                             </div>
 
@@ -50,8 +76,9 @@
                             <div class="form-group">
                                 <label>Đối tượng ưu tiên:</label>
                                 <select class="form-control" name="doiTuong">
-                                    <option value="" th:selected="${doiTuong == null || doiTuong == ''}">Không có đối
-                                        tượng</option>
+                                    <option value="" th:selected="${doiTuong == null || doiTuong == ''}">
+                                        Không có đối tượng
+                                    </option>
                                     <option value="01" th:selected="${doiTuong == '01'}">Đối tượng 01</option>
                                     <option value="02" th:selected="${doiTuong == '02'}">Đối tượng 02</option>
                                     <option value="03" th:selected="${doiTuong == '03'}">Đối tượng 03</option>
@@ -101,6 +128,30 @@
                                     th:value="${tiengAnh}">
                             </div>
 
+                            <div id="nk-section">
+
+                                <div class="form-group">
+                                    <label>Điểm năng khiếu 1:</label>
+                                    <input class="form-control" type="number" step="0.01" name="nk1" th:value="${nk1}">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Điểm năng khiếu 2:</label>
+                                    <input class="form-control" type="number" step="0.01" name="nk2" th:value="${nk2}">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Điểm năng khiếu 3:</label>
+                                    <input class="form-control" type="number" step="0.01" name="nk3" th:value="${nk3}">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Điểm năng khiếu 4:</label>
+                                    <input class="form-control" type="number" step="0.01" name="nk4" th:value="${nk4}">
+                                </div>
+
+                            </div>
+
                             <div class="btn-row">
                                 <button class="btn-primary" type="submit">Tính điểm</button>
                             </div>
@@ -119,6 +170,8 @@
                         th:text="${selectedMaNganh != null ? ' (' + selectedMaNganh + ')' : ''}"></span>
                 </h2>
                 <p class="note-text">
+                    Phương thức:
+                    <span class="chip" th:text="${ketQua.phuongThuc}"></span>.
                     Tổ hợp có điểm xét tuyển cao nhất:
 
                     <span class="highlight-red"
@@ -213,11 +266,6 @@
                                 <td th:text="${item.doLechText}"></td>
                             </tr>
 
-                            <!-- <tr>
-                                <td>Điểm tổ hợp gốc xét tuyển (ĐTHGXT)</td>
-                                <td th:text="${item.dthgxtText}"></td>
-                            </tr> -->
-
                             <tr>
                                 <td>Điểm ưu tiên (ĐUT)</td>
                                 <td th:text="${item.diemUuTienText}"></td>
@@ -235,14 +283,6 @@
                                     <span th:if="${!item.datSan}" class="status-fail">Không đạt</span>
                                 </td>
                             </tr>
-
-                            <!-- <tr>
-                                <td>Kết quả so với điểm trúng tuyển</td>
-                                <td>
-                                    <span th:if="${item.datTrungTuyen}" class="status-ok">Đạt</span>
-                                    <span th:if="${!item.datTrungTuyen}" class="status-fail">Chưa đạt</span>
-                                </td>
-                            </tr> -->
                         </tbody>
                     </table>
                 </div>
@@ -250,5 +290,40 @@
         </div>
     </div>
 </body>
+<script>
+
+    function toggleNKFields() {
+
+        const phuongThuc = document.getElementById("phuongThuc").value;
+        const nkSection = document.getElementById("nk-section");
+
+        if (phuongThuc === "THPT") {
+            nkSection.style.display = "block";
+        } else {
+            nkSection.style.display = "none";
+        }
+    }
+
+    document.getElementById("phuongThuc")
+        .addEventListener("change", toggleNKFields);
+
+    window.addEventListener("load", toggleNKFields);
+
+    const nganhInput = document.getElementById("nganhInput");
+    const maNganhHidden = document.getElementById("maNganhHidden");
+
+    if (nganhInput && maNganhHidden) {
+        nganhInput.addEventListener("input", function () {
+            const value = nganhInput.value.trim();
+
+            if (value.includes(" - ")) {
+                maNganhHidden.value = value.split(" - ")[0].trim();
+            } else {
+                maNganhHidden.value = value;
+            }
+        });
+    }
+
+</script>
 
 </html>
